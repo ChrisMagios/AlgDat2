@@ -12,8 +12,8 @@
 #include <cstring>
 #include <list>
 
-class RootKnot;
 class AbstractKnot;
+class InnerKnot;
 class TrieIterator;
 using namespace std;
 template<class T, class E = char>
@@ -22,12 +22,6 @@ class Trie {
 	typedef basic_string<E> key_type; // string=basic_string<char>
 	typedef pair<const string, T> value_type;
 	typedef T mapped_type;
-
-	// „...“ im folgenden typedef: keine C/C++ Ellipse, sondern von Ihnen
-	// - am besten als innere Klasse - zu entwickeln…
-	typedef TrieIterator iterator;
-private:
-	RootKnot root;
 
 public:
 
@@ -42,19 +36,32 @@ public:
 		AbstractKnot* parent;
 
 	public:
-		AbstractKnot() {
-			value = " ";
-			parent = nullptr;
-		}
-
-		AbstractKnot(char val, AbstractKnot father): value(val), parent(&father){
+		AbstractKnot() :
+				parent(nullptr) {
 
 		}
 
+		AbstractKnot(char val, AbstractKnot father) :
+				value(val), parent(father) {
+
+		}
+
+		bool operator==(const AbstractKnot &knot) {
+			return this->value == knot.value;
+		}
+		bool operator!=(const AbstractKnot &knot) {
+			return this->value != knot.value;
+		}
+
+		virtual bool operator=(const AbstractKnot &knot) {
+			return this->value = knot.value;
+		}
+		virtual void setValue(char c) {
+			this->value = c;
+		}
 		virtual char getValue() {
 			return this->value;
 		}
-
 	};
 
 	class InnerKnot: public AbstractKnot {
@@ -62,36 +69,123 @@ public:
 		list<AbstractKnot> son_knots;
 	public:
 
-		InnerKnot(): AbstractKnot() {
+		InnerKnot() :
+				AbstractKnot() {
 
 		}
-		InnerKnot(char val, AbstractKnot father) : AbstractKnot(val, father) {
+		InnerKnot(char val, AbstractKnot father) :
+				AbstractKnot(val, father) {
+		}
+
+		bool operator==(const InnerKnot &knot){
+			return this->value == knot.value;
+		}
+		bool operator!=(const InnerKnot &knot) {
+			return this->value != knot.value;
+		}
+		bool operator=(const InnerKnot &knot) {
 
 		}
+
+
 
 		void setSonKnot(AbstractKnot son) {
 			son_knots.insert(son);
 		}
-
-		virtual ~InnerKnot();
+		bool hasNextKnot(char cKnot) {
+			for (AbstractKnot k : son_knots) {
+				if (k.getValue() == cKnot)
+					return true;
+			}
+			return false;
+		}
+		AbstractKnot nextKnot(char nKnot) {
+			for (AbstractKnot k : son_knots) {
+				if (k.getValue() == nKnot)
+					return k;
+			}
+			return *this;
+		}
+		~InnerKnot();
 	};
 
 	class LeafKnot: public AbstractKnot {
+	private:
+		E translation;
 	public:
 		LeafKnot() {
+
+		}
+
+		LeafKnot(E word) : translation(word) {
 
 		}
 
 		virtual ~LeafKnot();
 	};
 
-
 	class TrieIterator {
+	private:
+		AbstractKnot* current;
+	public:
+		typedef TrieIterator iterator;
+		TrieIterator();
+		TrieIterator(AbstractKnot* root) :
+				current(root) {
+		}
+		TrieIterator(const iterator& itr) :
+				current(itr.current) {
+		}
+		iterator& operator =(const iterator& itr) {
+			current = itr.current;
+			return *this;
+		}
+		bool operator ==(const iterator& itr) {
+			return current == itr.current;
+		}
+		bool operator !=(const iterator& itr) {
+			return !operator==(itr);
+		}
+		T& operator *() {
+			return current->value();
+		}
+		iterator& operator ++(); // prefix
+		iterator operator ++(int) // postfix
+				{
+			iterator clone(*this);
+			operator ++();
+			return clone;
+		}
+		~TrieIterator() {
+
+		}
 
 	};
-
+	typedef TrieIterator iterator;
 	bool empty() const;
-	iterator insert(const value_type& value);
+
+	//Inserts value Element into the trie
+	iterator insert(const value_type& value) {
+		string key = value.first;
+		char knotValue;
+		InnerKnot currentKnot;
+
+
+		for (int i = 0; i <= key.length(); ++i) {
+			knotValue = key[i];
+			if (currentKnot.hasNextKnot(knotValue)) {
+				currentKnot = currentKnot.nextKnot(knotValue);
+				continue;
+			} else {
+
+				currentKnot.son_knots.insert(InnerKnot(knotValue));
+				currentKnot = currentKnot.nextKnot(knotValue);
+
+			}
+		}
+		return TrieIterator(this->root);
+	}
+
 	void erase(const key_type& value);
 	void clear(); // erase all
 	iterator lower_bound(const key_type& testElement); // first element >= testElement
@@ -103,5 +197,9 @@ public:
 	virtual ~Trie() {
 
 	}
+
+private:
+	InnerKnot root;
+
 };
 #endif /* TRIE_H_ */
