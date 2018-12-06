@@ -12,7 +12,7 @@
 #include <cstring>
 #include <list>
 
-class AbstractKnot;
+class InnerKnot;
 class InnerKnot;
 class TrieIterator;
 using namespace std;
@@ -29,32 +29,26 @@ public:
 		root = InnerKnot();
 	}
 
-// Abstrakte Knoten Klasse und deren Implementierungen
-	class AbstractKnot {
+	class InnerKnot {
 	private:
 		char value;
-		AbstractKnot* parent;
-
+		InnerKnot* parent;
+		list<InnerKnot> son_knots;
 	public:
-		AbstractKnot() :
+
+		InnerKnot() :
 				parent(nullptr) {
 
 		}
-
-		AbstractKnot(char val, AbstractKnot father) :
+		InnerKnot(char val, InnerKnot father) :
 				value(val), parent(father) {
-
 		}
 
-		bool operator==(const AbstractKnot &knot) {
+		bool operator==(const InnerKnot &knot) {
 			return this->value == knot.value;
 		}
-		bool operator!=(const AbstractKnot &knot) {
+		bool operator!=(const InnerKnot &knot) {
 			return this->value != knot.value;
-		}
-
-		virtual bool operator=(const AbstractKnot &knot) {
-			return this->value = knot.value;
 		}
 		virtual void setValue(char c) {
 			this->value = c;
@@ -62,54 +56,33 @@ public:
 		virtual char getValue() {
 			return this->value;
 		}
-	};
 
-	class InnerKnot: public AbstractKnot {
-	private:
-		list<AbstractKnot> son_knots;
-	public:
-
-		InnerKnot() :
-				AbstractKnot() {
-
-		}
-		InnerKnot(char val, AbstractKnot father) :
-				AbstractKnot(val, father) {
-		}
-
-		bool operator==(const InnerKnot &knot){
-			return this->value == knot.value;
-		}
-		bool operator!=(const InnerKnot &knot) {
-			return this->value != knot.value;
-		}
-		bool operator=(const InnerKnot &knot) {
-
-		}
-
-
-
-		void setSonKnot(AbstractKnot son) {
+		void setSonKnot(InnerKnot son) {
 			son_knots.insert(son);
 		}
+
+		list<InnerKnot> getSonKnot() {
+			return this->son_knots;
+		}
 		bool hasNextKnot(char cKnot) {
-			for (AbstractKnot k : son_knots) {
+			for (InnerKnot k : son_knots) {
 				if (k.getValue() == cKnot)
 					return true;
 			}
 			return false;
 		}
-		AbstractKnot nextKnot(char nKnot) {
-			for (AbstractKnot k : son_knots) {
+		InnerKnot nextKnot(char nKnot) {
+			for (InnerKnot k : son_knots) {
 				if (k.getValue() == nKnot)
 					return k;
 			}
 			return *this;
 		}
+
 		~InnerKnot();
 	};
 
-	class LeafKnot: public AbstractKnot {
+	class LeafKnot: public InnerKnot {
 	private:
 		E translation;
 	public:
@@ -117,8 +90,8 @@ public:
 
 		}
 
-		LeafKnot(E word) : translation(word) {
-
+		LeafKnot(E word, InnerKnot father) :
+				translation(word), InnerKnot::parent(father) {
 		}
 
 		virtual ~LeafKnot();
@@ -126,11 +99,11 @@ public:
 
 	class TrieIterator {
 	private:
-		AbstractKnot* current;
+		InnerKnot* current;
 	public:
 		typedef TrieIterator iterator;
 		TrieIterator();
-		TrieIterator(AbstractKnot* root) :
+		TrieIterator(InnerKnot* root) :
 				current(root) {
 		}
 		TrieIterator(const iterator& itr) :
@@ -162,23 +135,23 @@ public:
 
 	};
 	typedef TrieIterator iterator;
-	bool empty() const;
+	bool empty() const {
+		return root.son_knots.empty();
+	}
 
 	//Inserts value Element into the trie
 	iterator insert(const value_type& value) {
 		string key = value.first;
 		char knotValue;
-		InnerKnot currentKnot;
-
+		InnerKnot currentKnot = root;
 
 		for (int i = 0; i <= key.length(); ++i) {
 			knotValue = key[i];
 			if (currentKnot.hasNextKnot(knotValue)) {
 				currentKnot = currentKnot.nextKnot(knotValue);
-				continue;
 			} else {
 
-				currentKnot.son_knots.insert(InnerKnot(knotValue));
+				currentKnot.setSonKnot(InnerKnot(knotValue, currentKnot));
 				currentKnot = currentKnot.nextKnot(knotValue);
 
 			}
@@ -193,6 +166,10 @@ public:
 	iterator find(const key_type& testElement); // first element == testElement
 	iterator begin(); // returns end() if not found
 	iterator end();
+
+	string toString() {
+		return "Dummy Dummy toStringTrie";
+	}
 
 	virtual ~Trie() {
 
