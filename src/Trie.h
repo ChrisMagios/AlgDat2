@@ -41,7 +41,7 @@ public:
 
 		}
 		InnerKnot(char val, InnerKnot father) :
-				value(val), parent(father) {
+				value(val), parent(&father) {
 		}
 
 		bool operator==(const InnerKnot &knot) {
@@ -56,11 +56,6 @@ public:
 		virtual char getValue() {
 			return this->value;
 		}
-
-		void setSonKnot(InnerKnot son) {
-			son_knots.insert(son);
-		}
-
 		list<InnerKnot> getSonKnot() {
 			return this->son_knots;
 		}
@@ -79,7 +74,9 @@ public:
 			return *this;
 		}
 
-		~InnerKnot();
+		~InnerKnot() {
+
+		}
 	};
 
 	class LeafKnot: public InnerKnot {
@@ -120,7 +117,7 @@ public:
 			return !operator==(itr);
 		}
 		T& operator *() {
-			return current->value();
+			return *current->getValue();
 		}
 		iterator& operator ++(); // prefix
 		iterator operator ++(int) // postfix
@@ -143,20 +140,23 @@ public:
 	iterator insert(const value_type& value) {
 		string key = value.first;
 		char knotValue;
+
 		InnerKnot currentKnot = root;
 
-		for (int i = 0; i <= key.length(); ++i) {
+		for (unsigned int i = 0; i <= key.length(); ++i) {
 			knotValue = key[i];
+
 			if (currentKnot.hasNextKnot(knotValue)) {
 				currentKnot = currentKnot.nextKnot(knotValue);
 			} else {
-
-				currentKnot.setSonKnot(InnerKnot(knotValue, currentKnot));
+				currentKnot.getSonKnot().insert(
+						currentKnot.getSonKnot().begin(),
+						InnerKnot(knotValue, currentKnot));
 				currentKnot = currentKnot.nextKnot(knotValue);
 
 			}
 		}
-		return TrieIterator(this->root);
+		return TrieIterator(&this->root);
 	}
 
 	void erase(const key_type& value);
