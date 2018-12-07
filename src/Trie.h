@@ -10,7 +10,8 @@
 #include <stdio.h>
 #include <string>
 #include <cstring>
-#include <list>
+#include <map>
+#include <stack>
 
 class InnerKnot;
 class InnerKnot;
@@ -26,82 +27,71 @@ class Trie {
 public:
 
 	Trie() {
-		root = InnerKnot();
 	}
 
-	class InnerKnot {
+	// AbstractKnot class for easier inheritance
+	class AbstractKnot {
+		virtual void print(int level) = 0;
+	};
+
+	// Knot class for Trie knots, which do not have any value.
+	class InnerKnot: public AbstractKnot {
 	private:
-		char value;
-		InnerKnot* parent;
-		list<InnerKnot> son_knots;
+		map<E, AbstractKnot*> son_knots;
 	public:
 
-		InnerKnot() :
-				parent(nullptr) {
+		// Overrited abstract Class Method
+		void print(int level) {
 
 		}
-		InnerKnot(char val, InnerKnot father) :
-				value(val), parent(&father) {
+
+		InnerKnot() {
+
 		}
 
-		bool operator==(const InnerKnot &knot) {
-			return this->value == knot.value;
-		}
-		bool operator!=(const InnerKnot &knot) {
-			return this->value != knot.value;
-		}
-		virtual void setValue(char c) {
-			this->value = c;
-		}
-		virtual char getValue() {
-			return this->value;
-		}
-		list<InnerKnot> getSonKnot() {
+		map<E, AbstractKnot*>& getSonKnots() {
 			return this->son_knots;
 		}
-		bool hasNextKnot(char cKnot) {
-			for (InnerKnot k : son_knots) {
-				if (k.getValue() == cKnot)
-					return true;
-			}
-			return false;
-		}
-		InnerKnot nextKnot(char nKnot) {
-			for (InnerKnot k : son_knots) {
-				if (k.getValue() == nKnot)
-					return k;
-			}
-			return *this;
+		AbstractKnot& nextKnot(char nKnot) {
+			return *(this->son_knots.find(nKnot));
 		}
 
 		~InnerKnot() {
 
 		}
 	};
-
-	class LeafKnot: public InnerKnot {
+	// Knot class for Trie leafs, holding the value.
+	class LeafKnot: public AbstractKnot {
 	private:
-		E translation;
+		mapped_type valueLeaf;
+		AbstractKnot *nextLeaf = nullptr;
 	public:
 		LeafKnot() {
 
 		}
 
-		LeafKnot(E word, InnerKnot father) :
-				translation(word), InnerKnot::parent(father) {
+		LeafKnot(mapped_type word) :
+				valueLeaf(word) {
 		}
+		void print(int level) {
 
+		}
+		mapped_type& getvalueLeaf() {
+			return this->valueLeaf;
+		}
 		virtual ~LeafKnot();
 	};
 
 	class TrieIterator {
 	private:
-		InnerKnot* current;
+		LeafKnot* current = nullptr;
 	public:
 		typedef TrieIterator iterator;
-		TrieIterator();
-		TrieIterator(InnerKnot* root) :
-				current(root) {
+		TrieIterator() {
+
+		}
+		TrieIterator(LeafKnot start) :
+				current(start) {
 		}
 		TrieIterator(const iterator& itr) :
 				current(itr.current) {
@@ -116,12 +106,17 @@ public:
 		bool operator !=(const iterator& itr) {
 			return !operator==(itr);
 		}
-		T& operator *() {
-			return *current->getValue();
+		mapped_type& operator *() {
+			return *current->valueLeaf;
 		}
-		iterator& operator ++(); // prefix
-		iterator operator ++(int) // postfix
-				{
+		//prefix increment
+		iterator& operator ++() {
+			this->current = current->nextLeaf;
+			return this;
+		}
+
+		// postfix increment
+		iterator operator ++(int) {
 			iterator clone(*this);
 			operator ++();
 			return clone;
@@ -132,31 +127,27 @@ public:
 
 	};
 	typedef TrieIterator iterator;
+
 	bool empty() const {
 		return root.son_knots.empty();
 	}
 
-	//Inserts value Element into the trie
-	iterator insert(const value_type& value) {
-		string key = value.first;
-		char knotValue;
+	//Inserts Element @param value, into the trie
+	iterator insert(value_type& value) {
+		key_type key = value.first;
+		InnerKnot current = root;
 
-		InnerKnot currentKnot = root;
-
+		// Insert new knot for every character and jump to them.
 		for (unsigned int i = 0; i <= key.length(); ++i) {
-			knotValue = key[i];
-
-			if (currentKnot.hasNextKnot(knotValue)) {
-				currentKnot = currentKnot.nextKnot(knotValue);
-			} else {
-				currentKnot.getSonKnot().insert(
-						currentKnot.getSonKnot().begin(),
-						InnerKnot(knotValue, currentKnot));
-				currentKnot = currentKnot.nextKnot(knotValue);
-
-			}
+			current.getSonKnots().insert(
+					pair<E, AbstractKnot*>(key[i], InnerKnot()));
+			current = current.getSonKnots().at(key[i]);
 		}
-		return TrieIterator(&this->root);
+
+		//Insert our beautiful happy little leaf
+		current.getSonKnots().insert(leafToken, LeafKnot(value.second));
+
+		return iterator(current.getSonKnots().at(leafToken));
 	}
 
 	void erase(const key_type& value);
@@ -174,9 +165,10 @@ public:
 	virtual ~Trie() {
 
 	}
-
 private:
 	InnerKnot root;
+	char leafToken = ' ';
+	stack<AbstractKnot*> trieTrackStack;
 
 };
 #endif /* TRIE_H_ */
