@@ -21,23 +21,31 @@ template<class T, class E = char>
 class Trie {
 
 	typedef basic_string<E> key_type; // string=basic_string<char>
-	typedef pair<const string, T> value_type;
+	typedef pair<string, T> value_type;
 	typedef T mapped_type;
 
 public:
 
 	Trie() {
+
 	}
 
 	// AbstractKnot class for easier inheritance
 	class AbstractKnot {
+	private:
+		map<E, AbstractKnot&> son_knots;
+	public:
+
 		virtual void print(int level) = 0;
+
+		map<E, AbstractKnot&>& getSonKnots() {
+			return this->son_knots;
+		}
 	};
 
 	// Knot class for Trie knots, which do not have any value.
 	class InnerKnot: public AbstractKnot {
-	private:
-		map<E, AbstractKnot*> son_knots;
+
 	public:
 
 		// Overrited abstract Class Method
@@ -49,11 +57,12 @@ public:
 
 		}
 
-		map<E, AbstractKnot*>& getSonKnots() {
-			return this->son_knots;
-		}
 		AbstractKnot& nextKnot(char nKnot) {
-			return *(this->son_knots.find(nKnot));
+			return this->son_knots.find(nKnot);
+		}
+		InnerKnot& operator =(AbstractKnot& knt) {
+			this->getSonKnots() = knt.getSonKnots();
+			return *this;
 		}
 
 		~InnerKnot() {
@@ -64,7 +73,7 @@ public:
 	class LeafKnot: public AbstractKnot {
 	private:
 		mapped_type valueLeaf;
-		AbstractKnot *nextLeaf = nullptr;
+
 	public:
 		LeafKnot() {
 
@@ -79,7 +88,9 @@ public:
 		mapped_type& getvalueLeaf() {
 			return this->valueLeaf;
 		}
-		virtual ~LeafKnot();
+		~LeafKnot() {
+
+		}
 	};
 
 	class TrieIterator {
@@ -111,7 +122,7 @@ public:
 		}
 		//prefix increment
 		iterator& operator ++() {
-			this->current = current->nextLeaf;
+			this->current = current->son_knots.begin();
 			return this;
 		}
 
@@ -133,21 +144,23 @@ public:
 	}
 
 	//Inserts Element @param value, into the trie
-	iterator insert(value_type& value) {
+	iterator insert(const value_type& value) {
 		key_type key = value.first;
 		InnerKnot current = root;
 
 		// Insert new knot for every character and jump to them.
-		for (unsigned int i = 0; i <= key.length(); ++i) {
-			current.getSonKnots().insert(
-					pair<E, AbstractKnot*>(key[i], InnerKnot()));
+		InnerKnot innerKnots [key.length()];
+		for (unsigned int i = 0; i < key.length(); ++i) {
+			current.getSonKnots().insert(pair<E, AbstractKnot&>(key[i], innerKnots[i]));
 			current = current.getSonKnots().at(key[i]);
+
 		}
-
 		//Insert our beautiful happy little leaf
-		current.getSonKnots().insert(leafToken, LeafKnot(value.second));
+		LeafKnot lfK;
+		lfK = LeafKnot(value.second);
+		current.getSonKnots().insert(pair<E, AbstractKnot&>(leafToken, lfK));
 
-		return iterator(current.getSonKnots().at(leafToken));
+		return iterator();
 	}
 
 	void erase(const key_type& value);
@@ -167,7 +180,7 @@ public:
 	}
 private:
 	InnerKnot root;
-	char leafToken = ' ';
+	const char leafToken = ' ';
 	stack<AbstractKnot*> trieTrackStack;
 
 };
