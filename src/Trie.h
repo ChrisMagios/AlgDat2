@@ -57,11 +57,9 @@ public:
 
 		}
 
-		AbstractKnot& nextKnot(char nKnot) {
-			return *this->getSonKnots().at(nKnot);
-		}
-		InnerKnot& operator =(AbstractKnot& knt) {
-			this->getSonKnots() = knt.getSonKnots();
+
+		InnerKnot& operator =(AbstractKnot* knt) {
+			this->getSonKnots() = knt->getSonKnots();
 			return *this;
 		}
 
@@ -149,20 +147,24 @@ public:
 	//Inserts Element (@param value) into the trie
 	iterator insert(const value_type& value) {
 		key_type key = value.first;
-		InnerKnot current = root;
+		InnerKnot current = this->root;
 
 		// Insert new knot for every character and jump to them.
 		InnerKnot innerKnots[key.length()];
 		for (unsigned int i = 0; i < key.length(); ++i) {
 			current.getSonKnots().insert(
 					pair<E, AbstractKnot*>(key[i], new InnerKnot()));
-			current = current.nextKnot(key[i]);
+			cout << "KEY: "<<key[i] << endl;
+
+			current = current.getSonKnots().find(key[i]).operator *().second;
+
+
 
 		}
 		//Insert our beautiful happy little leaf
 		current.getSonKnots().insert(
 				pair<E, AbstractKnot*>(leafToken, new LeafKnot()));
-
+		cout << "END OF INSERT" << endl;
 		return iterator();
 	}
 
