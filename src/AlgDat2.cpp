@@ -81,7 +81,7 @@ int main() {
 
 			}
 
-			tree.insert(wordpair(word, trans));
+			tree.insert(Trie<string>::value_type(word, trans));
 
 			stream.clear();
 			word.clear();

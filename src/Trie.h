@@ -102,8 +102,9 @@ public:
 
 		}
 		TrieIterator(LeafKnot start) :
-				current(start) {
+				current(&start) {
 		}
+
 		TrieIterator(const iterator& itr) :
 				current(itr.current) {
 		}
@@ -118,7 +119,7 @@ public:
 			return !operator==(itr);
 		}
 		mapped_type& operator *() {
-			return *current->valueLeaf;
+			return current->valueLeaf;
 		}
 		//prefix increment
 		iterator& operator ++() {
@@ -143,15 +144,16 @@ public:
 		return root.son_knots.empty();
 	}
 
-	//Inserts Element @param value, into the trie
+	//Inserts Element (@param value) into the trie
 	iterator insert(const value_type& value) {
 		key_type key = value.first;
 		InnerKnot current = root;
 
 		// Insert new knot for every character and jump to them.
-		InnerKnot innerKnots [key.length()];
+		InnerKnot innerKnots[key.length()];
 		for (unsigned int i = 0; i < key.length(); ++i) {
-			current.getSonKnots().insert(pair<E, AbstractKnot&>(key[i], innerKnots[i]));
+			current.getSonKnots().insert(
+					pair<E, AbstractKnot&>(key[i], innerKnots[i]));
 			current = current.getSonKnots().at(key[i]);
 
 		}
@@ -160,7 +162,7 @@ public:
 		lfK = LeafKnot(value.second);
 		current.getSonKnots().insert(pair<E, AbstractKnot&>(leafToken, lfK));
 
-		return iterator();
+		return iterator(lfK);
 	}
 
 	void erase(const key_type& value);
@@ -172,7 +174,7 @@ public:
 	iterator end();
 
 	string toString() {
-		return "Dummy Dummy toStringTrie";
+		return " ";
 	}
 
 	virtual ~Trie() {
