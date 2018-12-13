@@ -58,10 +58,10 @@ public:
 		}
 
 		AbstractKnot& nextKnot(char nKnot) {
-			return this->son_knots.find(nKnot);
+			return *this->getSonKnots().at(nKnot);
 		}
-		InnerKnot& operator =(AbstractKnot* knt) {
-			this->getSonKnots() = knt->getSonKnots();
+		InnerKnot& operator =(AbstractKnot& knt) {
+			this->getSonKnots() = knt.getSonKnots();
 			return *this;
 		}
 
@@ -101,8 +101,10 @@ public:
 		TrieIterator() {
 
 		}
-		TrieIterator(LeafKnot start) :
-				current(&start) {
+
+		TrieIterator(AbstractKnot*& start) :
+				current(start) {
+
 		}
 
 		TrieIterator(const iterator& itr) :
@@ -154,15 +156,14 @@ public:
 		for (unsigned int i = 0; i < key.length(); ++i) {
 			current.getSonKnots().insert(
 					pair<E, AbstractKnot*>(key[i], new InnerKnot()));
-			current = current.getSonKnots().at(key[i]);
+			current = current.nextKnot(key[i]);
 
 		}
 		//Insert our beautiful happy little leaf
-		LeafKnot lfK;
-		lfK = LeafKnot(value.second);
-		current.getSonKnots().insert(pair<E, AbstractKnot*>(leafToken, new LeafKnot()));
+		current.getSonKnots().insert(
+				pair<E, AbstractKnot*>(leafToken, new LeafKnot()));
 
-		return iterator(lfK);
+		return iterator();
 	}
 
 	void erase(const key_type& value);
