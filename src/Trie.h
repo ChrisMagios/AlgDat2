@@ -33,12 +33,12 @@ public:
 	// AbstractKnot class for easier inheritance
 	class AbstractKnot {
 	private:
-		map<E, AbstractKnot&> son_knots;
+		map<E, AbstractKnot*> son_knots;
 	public:
 
 		virtual void print(int level) = 0;
 
-		map<E, AbstractKnot&>& getSonKnots() {
+		map<E, AbstractKnot*> getSonKnots() {
 			return this->son_knots;
 		}
 	};
@@ -60,8 +60,8 @@ public:
 		AbstractKnot& nextKnot(char nKnot) {
 			return this->son_knots.find(nKnot);
 		}
-		InnerKnot& operator =(AbstractKnot& knt) {
-			this->getSonKnots() = knt.getSonKnots();
+		InnerKnot& operator =(AbstractKnot* knt) {
+			this->getSonKnots() = knt->getSonKnots();
 			return *this;
 		}
 
@@ -153,14 +153,14 @@ public:
 		InnerKnot innerKnots[key.length()];
 		for (unsigned int i = 0; i < key.length(); ++i) {
 			current.getSonKnots().insert(
-					pair<E, AbstractKnot&>(key[i], innerKnots[i]));
+					pair<E, AbstractKnot*>(key[i], new InnerKnot()));
 			current = current.getSonKnots().at(key[i]);
 
 		}
 		//Insert our beautiful happy little leaf
 		LeafKnot lfK;
 		lfK = LeafKnot(value.second);
-		current.getSonKnots().insert(pair<E, AbstractKnot&>(leafToken, lfK));
+		current.getSonKnots().insert(pair<E, AbstractKnot*>(leafToken, new LeafKnot()));
 
 		return iterator(lfK);
 	}
