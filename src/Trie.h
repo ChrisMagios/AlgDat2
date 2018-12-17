@@ -14,8 +14,8 @@
 #include <stack>
 
 class InnerKnot;
-class InnerKnot;
 class TrieIterator;
+class AbstractKnot;
 using namespace std;
 template<class T, class E = char>
 class Trie {
@@ -38,7 +38,7 @@ public:
 
 		virtual void print(int level) = 0;
 
-		map<E, AbstractKnot*> getSonKnots() {
+		map<E, AbstractKnot*>& getSonKnots() {
 			return this->son_knots;
 		}
 	};
@@ -56,7 +56,6 @@ public:
 		InnerKnot() {
 
 		}
-
 
 		InnerKnot& operator =(AbstractKnot* knt) {
 			this->getSonKnots() = knt->getSonKnots();
@@ -100,11 +99,6 @@ public:
 
 		}
 
-		TrieIterator(AbstractKnot*& start) :
-				current(start) {
-
-		}
-
 		TrieIterator(const iterator& itr) :
 				current(itr.current) {
 		}
@@ -123,7 +117,7 @@ public:
 		}
 		//prefix increment
 		iterator& operator ++() {
-			this->current = current->son_knots.begin();
+			this->current = current->getSonKnots().begin();
 			return this;
 		}
 
@@ -145,30 +139,67 @@ public:
 	}
 
 	//Inserts Element (@param value) into the trie
-	iterator insert(const value_type& value) {
+	bool insert(value_type value, AbstractKnot *current) {
 		key_type key = value.first;
+
+		if (key.length() == 0) {
+			current->getSonKnots().insert(make_pair(leafToken, new LeafKnot()));
+			cout << value.second << endl;
+			return true;
+		} else if (current->getSonKnots().find(key[0])
+				== current->getSonKnots().end()) {
+			auto it = current->getSonKnots().insert(
+					std::make_pair(key[0], (new InnerKnot())));
+			value.first = key.substr(1, key.length());
+
+			cout << key << endl;
+			insert(value, it.first->second);
+		} else {
+			value.first = key.substr(1, key.length());
+			insert(value, current->getSonKnots().find(key[0])->second);
+		}
+
+		return false;
+	}
+//	key_type key = value.first;
+//			AbstractKnot *current = &root;
+//			// Insert new knot for every character and jump to them.
+//			for (unsigned int i = 0; i < key.length(); ++i) {
+//
+//				auto it = current->getSonKnots().insert(
+//						std::make_pair(key[i], static_cast<AbstractKnot*>(new InnerKnot())));
+//				cout << "FIRST: " << it.first->first << "SECOND: " << it.first->second << it.second<< endl;
+//				cout << "KEY: " << current->getSonKnots().find(key[i])->second << endl;
+//
+//				current = current->getSonKnots().find(key[i])->second;
+//			}
+//			current->getSonKnots().insert(
+//					make_pair(leafToken, new LeafKnot()));
+//			cout << "END OF INSERT" << endl;
+//			return iterator();
+
+	// Erase the element at the given key
+	// @return bool
+	// rekursiv mit substring überganbe erster char ist meiner ! usw
+	// @return true wenn letzter Knoten gelöscht werden kann.
+	// @return false wenn letzter Knoten nicht gelöscht werden kann.
+	void erase(const key_type& value) {
+		key_type key = value;
 		InnerKnot current = this->root;
 
 		// Insert new knot for every character and jump to them.
-		InnerKnot innerKnots[key.length()];
 		for (unsigned int i = 0; i < key.length(); ++i) {
-			current.getSonKnots().insert(
-					pair<E, AbstractKnot*>(key[i], new InnerKnot()));
-			cout << "KEY: "<<key[i] << endl;
-
+			trieTrackStack.push(current);
 			current = current.getSonKnots().find(key[i]).operator *().second;
+		}
+		trieTrackStack.push(
+				current.getSonKnots().find(leafToken).operator *().second);
 
-
+		while (!trieTrackStack.empty()) {
 
 		}
-		//Insert our beautiful happy little leaf
-		current.getSonKnots().insert(
-				pair<E, AbstractKnot*>(leafToken, new LeafKnot()));
-		cout << "END OF INSERT" << endl;
-		return iterator();
-	}
 
-	void erase(const key_type& value);
+	}
 	void clear(); // erase all
 	iterator lower_bound(const key_type& testElement); // first element >= testElement
 	iterator upper_bound(const key_type& testElement); // first element > testElement
@@ -178,6 +209,9 @@ public:
 
 	string toString() {
 		return " ";
+	}
+	InnerKnot& getRoot() {
+		return this->root;
 	}
 
 	virtual ~Trie() {

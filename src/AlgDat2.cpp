@@ -22,7 +22,7 @@ void preFill() {
 
 	for (wordpair x : preList) {
 
-		// insert x
+
 
 	}
 }
@@ -81,7 +81,7 @@ int main() {
 
 			}
 
-			tree.insert(wordpair(word, trans));
+			tree.insert(wordpair(word, trans), &tree.getRoot());
 
 			stream.clear();
 			word.clear();
