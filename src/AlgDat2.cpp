@@ -32,6 +32,8 @@ int main() {
 	//Stuff I need in the Main
 
 	Trie<string> tree;
+	Trie<string>::iterator iti = tree.begin();
+	iti = tree.end();
 	bool isDone = false;
 	string input;
 
@@ -82,6 +84,7 @@ int main() {
 			}
 
 			tree.insert(wordpair(word, trans), &tree.getRoot());
+			tree.erase(word);
 
 			stream.clear();
 			word.clear();
