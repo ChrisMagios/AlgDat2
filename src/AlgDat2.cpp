@@ -61,10 +61,10 @@ int main() {
 		if (input == "fill") {
 			preFill();
 		} else if (input == "show") {
-			tree.toString();
+			//tree.toString();
 		} else if (input == "end") {
 			isDone = true;
-			tree.toString();
+			//tree.toString();
 		} else {
 			string word = "";
 			string trans = "";

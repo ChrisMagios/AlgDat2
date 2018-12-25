@@ -142,6 +142,7 @@ public:
 	};
 	typedef TrieIterator iterator;
 
+	// return true if root has no sons.
 	bool empty() {
 		return root.getSonKnots().empty();
 	}
@@ -150,17 +151,19 @@ public:
 	iterator insert(value_type value, AbstractKnot *current) {
 		key_type key = value.first;
 
+		// inserts the leaf after the key.
 		if (key.length() == 0) {
 			current->getSonKnots().insert(make_pair(leafToken, new LeafKnot()));
-			cout << value.second << endl;
+			cout << "Inserted the word: " << value.second << endl;
 			return iterator();
+
 		} else if (current->getSonKnots().find(key[0])
 				== current->getSonKnots().end()) {
+
+			// inserts the key recurse.
 			auto it = current->getSonKnots().insert(
 					std::make_pair(key[0], (new InnerKnot())));
 			value.first = key.substr(1, key.length());
-
-			cout << key << endl;
 			insert(value, it.first->second);
 		} else {
 			value.first = key.substr(1, key.length());
@@ -170,24 +173,37 @@ public:
 		return iterator();
 	}
 
-	void buildTrackStack(const key_type& value, AbstractKnot *current) {
-		key_type key = value;
-		trackStack.push(current);
-		if (key.length() != 0) {
-			buildTrackStack(key.substr(1, key.length()),
-					current->getSonKnots().find(key[0])->second);
-		}
-	}
-	// @return bool
 	// rekursiv mit substring überganbe erster char ist meiner ! usw
 	// @return true wenn letzter Knoten gelöscht werden kann.
 	// @return false wenn letzter Knoten nicht gelöscht werden kann.
 	bool erase(const key_type& value) {
 		key_type key = value;
+		AbstractKnot* current;
 
-		if (trackStack.empty() && !erase(key)) {
-			buildTrackStack(key, &root);
+		// build up the trackStack
+		if (key.length() != 0) {
+
+			if (trackStack.empty()) {
+				trackStack.push(pair<AbstractKnot*, char> (&root, ' '));
+			}
+			// push next key Knot ontop of the stack
+			current = trackStack.top().first;
+			trackStack.push(pair<AbstractKnot*, char>(current->getSonKnots().find(key[0])->second, key[0]));
+			key = key.substr(1, key.length());
+			erase(key);
 		}
+
+		// erase the leaf and the path of Inner Knots
+		current = trackStack.top().first;
+		char currentKeyPath = trackStack.top().second;
+		if (current->getSonKnots().size() == 1) {
+			delete current;
+		}
+		else {
+			delete current->getSonKnots().find(currentKeyPath)->second;
+		}
+		trackStack.pop();
+
 		return true;
 	}
 
@@ -195,8 +211,8 @@ public:
 	iterator lower_bound(const key_type& testElement); // first element >= testElement
 	iterator upper_bound(const key_type& testElement); // first element > testElement
 
-	// return it auf first element == testElement
-	// return it auf nullptr, wenn testElement nicht gefunden
+	// return itr auf element falls dieses exsistiert.
+	// return itr auf nullptr, wenn element nicht gefunden wurde.
 	iterator find(const key_type& element) {
 		AbstractKnot* current = root;
 
@@ -261,7 +277,7 @@ public:
 private:
 	InnerKnot root;
 	const char leafToken = ' ';
-	stack<AbstractKnot*> trackStack;
+	stack<pair <AbstractKnot*, char>> trackStack;
 
 };
 #endif /* TRIE_H_ */
