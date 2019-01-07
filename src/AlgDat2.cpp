@@ -32,8 +32,6 @@ int main() {
 	//Stuff I need in the Main
 
 	Trie<string> tree;
-	Trie<string>::iterator iti = tree.begin();
-	iti = tree.end();
 	bool isDone = false;
 	string input;
 
@@ -59,12 +57,14 @@ int main() {
 		std::transform(input.begin(), input.end(), input.begin(), ::tolower);
 
 		if (input == "fill") {
-			preFill();
+			for(wordpair x: preList){
+				tree.insert(x,&tree.getRoot());
+			}
 		} else if (input == "show") {
 			//tree.toString();
 		} else if (input == "end") {
 			isDone = true;
-			//tree.toString();
+			cout << tree.toString() << endl;
 		} else {
 			string word = "";
 			string trans = "";
@@ -84,7 +84,6 @@ int main() {
 			}
 
 			tree.insert(wordpair(word, trans), &tree.getRoot());
-			tree.erase(word);
 
 			stream.clear();
 			word.clear();
