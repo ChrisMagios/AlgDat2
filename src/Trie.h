@@ -83,7 +83,10 @@ public:
 				valueLeaf(word) {
 		}
 		void print(int level) {
-
+			for (int i = 0; i < level; ++i) {
+				cout << "-";
+			}
+			cout << valueLeaf << endl;
 		}
 		mapped_type& getvalueLeaf() {
 			return this->valueLeaf;
@@ -99,7 +102,8 @@ public:
 		LeafKnot* current = nullptr;
 	public:
 		typedef TrieIterator iterator;
-		TrieIterator() : current(nullptr) {
+		TrieIterator() :
+				current(nullptr) {
 
 		}
 
@@ -110,6 +114,7 @@ public:
 		TrieIterator(const iterator& itr) :
 				current(itr.current) {
 		}
+
 		iterator& operator =(const iterator& itr) {
 			current = itr.current;
 			return *this;
@@ -118,31 +123,16 @@ public:
 			return current == itr.current;
 		}
 		bool operator !=(const iterator& itr) {
-			return stackOfCurrentLeaf == itr.stackOfCurrentLeaf && current == itr.current;
+
+			return current != itr.current;
 		}
 
 		mapped_type& operator *() {
+			current->print(stackOfCurrentLeaf.size());
 			return current->getvalueLeaf();
 		}
 		//prefix increment
 		iterator& operator ++() {
-			bool token = true;
-			while (token) {
-				stackOfCurrentLeaf.pop();
-				if (stackOfCurrentLeaf.top()->getSonKnots().size() != 1) {
-					//secondelem
-					while (stackOfCurrentLeaf.top()->getSonKnots().find(
-							' ')
-							== stackOfCurrentLeaf.top()->getSonKnots().end()) {
-						stackOfCurrentLeaf.push(
-								stackOfCurrentLeaf.top()->getSonKnots().begin()->second);
-					}
-					token = false;
-				}
-
-			}
-			current = (LeafKnot*) stackOfCurrentLeaf.top()->getSonKnots().find(
-					' ')->second;
 			return *this;
 		}
 
@@ -180,6 +170,9 @@ public:
 			// inserts the key recurse.
 			auto it = current->getSonKnots().insert(
 					std::make_pair(key[0], (new InnerKnot())));
+
+			cout << "Inserted :" << current->getSonKnots().find(key[0])->first
+					<< endl;
 			value.first = key.substr(1, key.length());
 			insert(value, it.first->second);
 		} else {
@@ -285,15 +278,13 @@ public:
 	string toString() {
 		cout << "fuck this shit" << endl;
 		string result = "";
+
 		iterator it = begin();
 		//InnerKnot current = this->root;
 
-		do{
-			cout << "this shit too" << endl;
-			result.append("HH88");
-
-		}
-		while(it != end());
+		do {
+			*it;
+		} while (it != end());
 
 		return result;
 
