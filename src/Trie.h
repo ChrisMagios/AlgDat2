@@ -12,6 +12,7 @@
 #include <cstring>
 #include <map>
 #include <stack>
+#include <list>
 
 class InnerKnot;
 class TrieIterator;
@@ -98,7 +99,7 @@ public:
 
 	class TrieIterator {
 	private:
-		stack<AbstractKnot*> stackOfCurrentLeaf;
+		list<AbstractKnot*> stackOfCurrentLeaf;
 		LeafKnot* current;
 	public:
 		typedef TrieIterator iterator;
@@ -107,7 +108,7 @@ public:
 
 		}
 
-		TrieIterator(LeafKnot* start, stack<AbstractKnot*> startLeaf) :
+		TrieIterator(LeafKnot* start, list<AbstractKnot*> startLeaf) :
 				current(start), stackOfCurrentLeaf(startLeaf) {
 
 		}
@@ -116,6 +117,10 @@ public:
 		}
 		void print() {
 			current->print(stackOfCurrentLeaf.size());
+		}
+
+		list<AbstractKnot*> getStackOfCurrentLeaf() {
+			return this->stackOfCurrentLeaf;
 		}
 		iterator& operator =(const iterator& itr) {
 			current = itr.current;
@@ -134,19 +139,7 @@ public:
 		}
 		//prefix increment
 		iterator& operator ++() {
-			AbstractKnot* tmpLast;
-			stack<AbstractKnot*> tmpLeafStack = stackOfCurrentLeaf
-			while (turh) {
-				if (tmpLeafStack.top()->getSonKnots().size() > 1) {
-					// if there are more sons under this knot.
-
-				} else {
-					// there is only a leaf under the top knot.
-
-					tmpLeafStack.pop();
-				}
-			}
-
+			stackOfCurrentLeaf.pop_back();
 			return *this;
 		}
 
@@ -242,13 +235,13 @@ public:
 	// return itr auf nullptr, wenn element nicht gefunden wurde.
 	iterator find(const key_type& element) {
 		AbstractKnot* current = &root;
-		stack<AbstractKnot*> stackOfLeafToFind;
+		list<AbstractKnot*> stackOfLeafToFind;
 		for (unsigned int i = 0; i < element.length(); ++i) {
 			if (current->getSonKnots().find(element[i])
 					== current->getSonKnots().end()) {
 				return iterator();
 			} else {
-				stackOfLeafToFind.push(current);
+				stackOfLeafToFind.push_back(current);
 				current = current->getSonKnots().find(element[i])->second;
 			}
 		}
@@ -260,14 +253,14 @@ public:
 
 	// Gibt einen Iterator zurück, welcher auf das erste Wort im Baum zeigt.
 	iterator begin() {
-		stack<AbstractKnot*> stackOfFirstLeaf;
+		list<AbstractKnot*> stackOfFirstLeaf;
 		AbstractKnot *current = &this->root;
 		if (empty()) {
 			return iterator();
 		}
 		while (current->getSonKnots().find(leafToken)
 				== current->getSonKnots().end()) {
-			stackOfFirstLeaf.push(current);
+			stackOfFirstLeaf.push_back(current);
 			current = current->getSonKnots().begin()->second;
 		}
 
@@ -277,14 +270,14 @@ public:
 	}
 
 	iterator end() {
-		stack<AbstractKnot*> stackOfLastLeaf;
+		list<AbstractKnot*> stackOfLastLeaf;
 		AbstractKnot *current = &root;
 		if (this->empty()) {
 			return iterator();
 		}
 		while (current->getSonKnots().find(leafToken)
 				== current->getSonKnots().end()) {
-			stackOfLastLeaf.push(current);
+			stackOfLastLeaf.push_back(current);
 			current = current->getSonKnots().rbegin()->second;
 		}
 		return iterator(
@@ -293,18 +286,54 @@ public:
 	}
 
 	string toString() {
-		cout << "fuck this shit" << endl;
 		string result = "";
-
 		iterator it = begin();
+		list<AbstractKnot*> stack = it.getStackOfCurrentLeaf();
+		auto tmpStack = it.getStackOfCurrentLeaf();
 		//InnerKnot current = this->root;
+		//InnerKnot currentX = it.getCurrent()->root;
+		//cout << current.getSonKnots().find('d')->first << endl;
+		//cout << current.getSonKnots().begin()->first << endl;
+		//it.getStackOfCurrentLeaf().pop();
+		//cout << "TEST: " << it.getStackOfCurrentLeaf().top()->getSonKnots().begin()->first << endl;
 
-		do {
-			it.print();
-		} while (it != end());
+		int i = 0;
 
+//		do {
+//			//sollten wir mal im print nach schauen... wegen extra Loop
+
+//			if (stack.top()->getSonKnots().size() >= 1) {
+//				tmpStack = stack;
+//				cout << stack.top()->getSonKnots().size() << "@"
+//						<< " current Knot: ";
+//				for (auto itt = stack.top()->getSonKnots().begin();
+//						itt != stack.top()->getSonKnots().end(); itt++) {
+//					cout << itt->first << " ";
+//				}
+//				cout << endl;
+//			}
+//
+//			//hab hier ne 2 rein weil iwas sonst ned stimmt :*
+//			for (int i = 0; i <= stack.size(); i++) {
+//				cout << "-";
+//			}
+//			cout << stack.top()->getSonKnots().begin()->first << endl;
+//			stack.pop();
+//			if (stack.empty()) {
+//				cout << "Next Leaf---" << endl;
+//				++it;
+//				stack = it.getStackOfCurrentLeaf();
+//			}
+//		} while (it != end());
+
+		//do {
+		//	it.print();
+		//	++i;
+		//	cout << i << endl;
+		//} while (i <= 5 && it != end());
+
+		i = 0;
 		return result;
-
 	}
 	InnerKnot& getRoot() {
 		return this->root;
