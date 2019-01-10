@@ -100,6 +100,7 @@ public:
 	class TrieIterator {
 	private:
 		stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> stackOfCurrentLeaf;
+		stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> endOfSonList;
 		LeafKnot* current;
 	public:
 		typedef TrieIterator iterator;
@@ -108,6 +109,7 @@ public:
 		}
 
 		TrieIterator(stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> ita){
+			endOfSonList.push((*ita.top()).second->getSonKnots().end());
 			slideLeft();
 		}
 
@@ -145,10 +147,14 @@ public:
 				return stackOfCurrentLeaf;
 			}
 			//push left element on top the stack.
-			return stackOfCurrentLeaf.push((*stackOfCurrentLeaf.top()).second->getSonKnots().begin());
+
+			stackOfCurrentLeaf.push((*stackOfCurrentLeaf.top()).second->getSonKnots().begin());
+			endOfSonList.push((*stackOfCurrentLeaf.top()).second->getSonKnots().end());
 		}
 		//prefix increment
 		iterator& operator ++() {
+
+
 
 		}
 
