@@ -105,7 +105,10 @@ public:
 		typedef TrieIterator iterator;
 		TrieIterator() :
 				current(nullptr) {
+		}
 
+		TrieIterator(stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> ita){
+			slideLeft();
 		}
 
 		TrieIterator(LeafKnot* start, stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> startLeaf) :
@@ -118,7 +121,6 @@ public:
 		void print() {
 			current->print(stackOfCurrentLeaf.size());
 		}
-
 		stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> getStackOfCurrentLeaf() {
 			return this->stackOfCurrentLeaf;
 		}
@@ -258,20 +260,29 @@ public:
 
 	// Gibt einen Iterator zurück, welcher auf das erste Wort im Baum zeigt.
 	iterator begin() {
-		stack<InnerKnot*> stackOfFirstLeaf;
-		InnerKnot *current = &this->root;
-		if (empty()) {
-			return iterator();
-		}
-		while (current->getSonKnots().find(leafToken)
-				== current->getSonKnots().end()) {
-			stackOfFirstLeaf.push(current);
-			current = (InnerKnot*) current->getSonKnots().begin()->second;
-		}
 
-		return iterator(
-				(LeafKnot*) current->getSonKnots().find(leafToken)->second,
-				stackOfFirstLeaf);
+		stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> ita;
+		ita.push(root.getSonKnots().begin());
+		iterator it = iterator(ita);
+		while(it.getStackOfCurrentLeaf().top()->second.getSonKnots().find(leafToken) && it.getStackOfCurrentLeaf().top()->second.getSonKnots() == 1){
+			it = it.slideLeft();
+		}
+		return it;
+//
+//		stack<InnerKnot*> stackOfFirstLeaf;
+//		InnerKnot *current = &this->root;
+//		if (empty()) {
+//			return iterator();
+//		}
+//		while (current->getSonKnots().find(leafToken)
+//				== current->getSonKnots().end()) {
+//			stackOfFirstLeaf.push(current);
+//			current = (InnerKnot*) current->getSonKnots().begin()->second;
+//		}
+//
+//		return iterator(
+//				(LeafKnot*) current->getSonKnots().find(leafToken)->second,
+//				stackOfFirstLeaf);
 	}
 
 	iterator end() {
