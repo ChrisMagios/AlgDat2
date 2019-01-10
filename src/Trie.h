@@ -99,7 +99,7 @@ public:
 
 	class TrieIterator {
 	private:
-		list<AbstractKnot*> stackOfCurrentLeaf;
+		stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> stackOfCurrentLeaf;
 		LeafKnot* current;
 	public:
 		typedef TrieIterator iterator;
@@ -108,7 +108,7 @@ public:
 
 		}
 
-		TrieIterator(LeafKnot* start, list<AbstractKnot*> startLeaf) :
+		TrieIterator(LeafKnot* start, stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> startLeaf) :
 				current(start), stackOfCurrentLeaf(startLeaf) {
 
 		}
@@ -119,7 +119,7 @@ public:
 			current->print(stackOfCurrentLeaf.size());
 		}
 
-		list<AbstractKnot*> getStackOfCurrentLeaf() {
+		stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator> getStackOfCurrentLeaf() {
 			return this->stackOfCurrentLeaf;
 		}
 		iterator& operator =(const iterator& itr) {
@@ -137,10 +137,17 @@ public:
 		mapped_type& operator *() {
 			return *current->getvalueLeaf();
 		}
+		stack<typename map<E, Trie<T,E>::AbstractKnot*>::iterator>& slideLeft() {
+			// check if the next left element is a leaf.
+			if ((*stackOfCurrentLeaf.top()).second->getSonKnots().find(leafToken) == (*stackOfCurrentLeaf.top()).second->getSonKnots().end()) {
+				return stackOfCurrentLeaf;
+			}
+			//push left element on top the stack.
+			return stackOfCurrentLeaf.push((*stackOfCurrentLeaf.top()).second->getSonKnots().begin());
+		}
 		//prefix increment
 		iterator& operator ++() {
-			stackOfCurrentLeaf.pop_back();
-			return *this;
+
 		}
 
 		// postfix increment
@@ -176,12 +183,10 @@ public:
 
 			// inserts the key recurse and add the knot to the stack.
 			auto it = current->getSonKnots().insert(
-					std::make_pair(key[0], (new InnerKnot())));
+					std::make_pair(key[0], (new InnerKnot()))).first;
 
-			cout << "Inserted :" << current->getSonKnots().find(key[0])->first
-					<< endl;
 			value.first = key.substr(1, key.length());
-			insert(value, it.first->second);
+			insert(value, it->second);
 		} else {
 			value.first = key.substr(1, key.length());
 			insert(value, current->getSonKnots().find(key[0])->second);
@@ -234,15 +239,15 @@ public:
 	// return itr auf element falls dieses exsistiert.
 	// return itr auf nullptr, wenn element nicht gefunden wurde.
 	iterator find(const key_type& element) {
-		AbstractKnot* current = &root;
-		list<AbstractKnot*> stackOfLeafToFind;
+		InnerKnot* current = &root;
+		stack<InnerKnot*> stackOfLeafToFind;
 		for (unsigned int i = 0; i < element.length(); ++i) {
 			if (current->getSonKnots().find(element[i])
 					== current->getSonKnots().end()) {
 				return iterator();
 			} else {
-				stackOfLeafToFind.push_back(current);
-				current = current->getSonKnots().find(element[i])->second;
+				stackOfLeafToFind.push(current);
+				current = (InnerKnot*) current->getSonKnots().find(element[i])->second;
 			}
 		}
 
@@ -253,15 +258,15 @@ public:
 
 	// Gibt einen Iterator zurück, welcher auf das erste Wort im Baum zeigt.
 	iterator begin() {
-		list<AbstractKnot*> stackOfFirstLeaf;
-		AbstractKnot *current = &this->root;
+		stack<InnerKnot*> stackOfFirstLeaf;
+		InnerKnot *current = &this->root;
 		if (empty()) {
 			return iterator();
 		}
 		while (current->getSonKnots().find(leafToken)
 				== current->getSonKnots().end()) {
-			stackOfFirstLeaf.push_back(current);
-			current = current->getSonKnots().begin()->second;
+			stackOfFirstLeaf.push(current);
+			current = (InnerKnot*) current->getSonKnots().begin()->second;
 		}
 
 		return iterator(
@@ -270,15 +275,15 @@ public:
 	}
 
 	iterator end() {
-		list<AbstractKnot*> stackOfLastLeaf;
-		AbstractKnot *current = &root;
+		stack<InnerKnot*> stackOfLastLeaf;
+		InnerKnot *current = &root;
 		if (this->empty()) {
 			return iterator();
 		}
 		while (current->getSonKnots().find(leafToken)
 				== current->getSonKnots().end()) {
-			stackOfLastLeaf.push_back(current);
-			current = current->getSonKnots().rbegin()->second;
+			stackOfLastLeaf.push(current);
+			current = (InnerKnot*) current->getSonKnots().rbegin()->second;
 		}
 		return iterator(
 				(LeafKnot*) current->getSonKnots().find(leafToken)->second,
@@ -288,8 +293,19 @@ public:
 	string toString() {
 		string result = "";
 		iterator it = begin();
-		list<AbstractKnot*> stack = it.getStackOfCurrentLeaf();
+		stack<InnerKnot*> stack = it.getStackOfCurrentLeaf();
 		auto tmpStack = it.getStackOfCurrentLeaf();
+
+		while(it != end()){
+			cout << stack.top()->getSonKnots().begin()->first << endl;
+			++it;
+			cout << "hi";
+		}
+
+
+
+
+
 		//InnerKnot current = this->root;
 		//InnerKnot currentX = it.getCurrent()->root;
 		//cout << current.getSonKnots().find('d')->first << endl;
@@ -297,7 +313,6 @@ public:
 		//it.getStackOfCurrentLeaf().pop();
 		//cout << "TEST: " << it.getStackOfCurrentLeaf().top()->getSonKnots().begin()->first << endl;
 
-		int i = 0;
 
 //		do {
 //			//sollten wir mal im print nach schauen... wegen extra Loop
@@ -331,8 +346,6 @@ public:
 		//	++i;
 		//	cout << i << endl;
 		//} while (i <= 5 && it != end());
-
-		i = 0;
 		return result;
 	}
 	InnerKnot& getRoot() {
@@ -344,7 +357,7 @@ public:
 	}
 private:
 	InnerKnot root;
-	const char leafToken = ' ';
+	const char leafToken = '/0';
 	stack<pair<AbstractKnot*, char>> trackStack;
 
 };
