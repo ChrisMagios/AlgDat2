@@ -15,7 +15,8 @@
 using namespace std;
 typedef pair<string, string> wordpair;
 
-wordpair preList[] = { wordpair("distel", "cool"), wordpair("distanz",
+wordpair preList[] = {
+		wordpair("distel", "cool"), wordpair("distanz",
 		"distance"), wordpair("du", "you"), wordpair("durch", "through"), };
 
 void preFill() {
