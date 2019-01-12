@@ -109,31 +109,18 @@ public:
 		}
 
 		TrieIterator(AbstractKnot* root) {
+			// push root son Knots ontop of empty stack
 			stackOfCurrentLeaf.push(root->getSonKnots().begin());
 			endOfSon.push(root->getSonKnots().end());
-			endOfSon.push(
-					(*stackOfCurrentLeaf.top()).second->getSonKnots().end());
 			if (root->getSonKnots().find('@') == root->getSonKnots().end()) {
-				cout << (*stackOfCurrentLeaf.top()).first << endl;
 				slideLeft();
 			}
-
-			while (((*stackOfCurrentLeaf.top()).second->getSonKnots().find('@')
-					== (*stackOfCurrentLeaf.top()).second->getSonKnots().end())) {
-
-				cout << (*stackOfCurrentLeaf.top()).first << endl;
-				//cout << (*stackOfCurrentLeaf.top()).second->getSonKnots().find('@')->first << endl;
-				//cout << (*stackOfCurrentLeaf.top()).second->getSonKnots().end()->first << endl;
-				//cout << "BEGIN KNOT: " << (*stackOfCurrentLeaf.top()).second->getSonKnots().begin()->first << endl;
-				slideLeft();
-			}
-
 			// set to first leaf
 			current =
 					(LeafKnot*) (*stackOfCurrentLeaf.top()).second->getSonKnots().find(
 							'@')->second;
-			stackOfCurrentLeaf.push(
-					(*stackOfCurrentLeaf.top()).second->getSonKnots().begin());
+			cout << "ITERATOR FINISHED AT: " << stackOfCurrentLeaf.top()->first
+					<< " : " << current->getvalueLeaf() << endl;
 
 		}
 
@@ -166,16 +153,18 @@ public:
 			// check if the next left element is a leaf.
 			char leafToken = '@';
 
-			if ((*stackOfCurrentLeaf.top()).first != leafToken) {
-
-
-
+			while (((*stackOfCurrentLeaf.top()).second->getSonKnots().find(
+					leafToken)
+					== (*stackOfCurrentLeaf.top()).second->getSonKnots().end())) {
+				// push It of begin and end of the same map to the stacks.
 				stackOfCurrentLeaf.push(
 						(*stackOfCurrentLeaf.top()).second->getSonKnots().begin());
 
 				endOfSon.push(
 						(*stackOfCurrentLeaf.top()).second->getSonKnots().end());
+
 			}
+
 			//push left element and end of map ontop of the stacks.
 
 		}
@@ -183,38 +172,29 @@ public:
 		//prefix increment
 		iterator& operator ++() {
 			//go up and right
-			stackOfCurrentLeaf.top().operator ++();
-			cout << "Top of the Stacks before ++:  "
-					<< (*stackOfCurrentLeaf.top()).second << " , "
-					<< (*endOfSon.top()).second << endl;
-
-			cout << "Size OF STACKS: " << stackOfCurrentLeaf.size() << " END: " << endOfSon.size() << endl;
+			cout << "BEFORE ++TOP:" << stackOfCurrentLeaf.top()->second << endl;
+			++(stackOfCurrentLeaf.top());
+			cout << "AFTER ++TOP:" << stackOfCurrentLeaf.top()->second << endl;
+			cout << "END OF SONS TOP:" << endOfSon.top()->second << endl;
+			// pop until you find another sonKnot in your current top stack map.
 			while (stackOfCurrentLeaf.top() == endOfSon.top()) {
 				stackOfCurrentLeaf.pop();
 				endOfSon.pop();
-				cout << "AT CHAR : " << stackOfCurrentLeaf.top()->first << endl;
-				stackOfCurrentLeaf.top().operator ++();
+				++(stackOfCurrentLeaf.top());
 			}
-			cout << "TOP OF STACK after going up:  "
-					<< (*stackOfCurrentLeaf.top()).first << endl;
-			cout << "Size OF STACKS: " << stackOfCurrentLeaf.size() << " END: " << endOfSon.size() << endl;
-			while ((*stackOfCurrentLeaf.top()).second->getSonKnots().find('@')->second
-					== (*stackOfCurrentLeaf.top()).second->getSonKnots().end()->second
-					&& (*stackOfCurrentLeaf.top()).second->getSonKnots().size()
-							< 2) {
-				slideLeft();
-			}
-			cout << "TOP OF STACK after going down:  "
-					<< (*stackOfCurrentLeaf.top()).first << endl;
-			cout << "Size OF STACKS: " << stackOfCurrentLeaf.size() << " END: " << endOfSon.size() << endl;
 
+			// down to the next leaf
+			slideLeft();
 			current =
 					(LeafKnot*) (*stackOfCurrentLeaf.top()).second->getSonKnots().find(
 							'@')->second;
+
+			// Outputs
 			cout << "Top of the Stacks after ++:  "
-								<< (*stackOfCurrentLeaf.top()).second << " , "
-								<< (*endOfSon.top()).second << endl;
-			cout << "Size OF STACKS: " << stackOfCurrentLeaf.size() << " END: " << endOfSon.size() << endl;
+					<< (*stackOfCurrentLeaf.top()).second << " , "
+					<< (*endOfSon.top()).second << endl;
+			cout << "Size OF STACKS: " << stackOfCurrentLeaf.size() << " END: "
+					<< endOfSon.size() << endl;
 			return *this;
 
 		}
@@ -246,12 +226,10 @@ public:
 		if (key.length() == 0) {
 			current->getSonKnots().insert(
 					make_pair(leafToken, new LeafKnot(value.second)));
-			cout << "Inserted the word: " << value.second << endl;
-			iterator it = iterator(&root);
-			cout << "IT CURRENT: " << *it << endl;
+			iterator it =  iterator(&root);
 
-			cout << "iterator in insert " << *it << endl;
-			cout << "value in insert " << value.second << endl;
+			cout << "iterator in insert: " << *it << endl;
+			cout << "value in insert: " << value.second << endl;
 			while (*it != value.second) {
 				++it;
 				cout << "++" << endl;
@@ -313,7 +291,9 @@ public:
 	void clear() {
 		// erase all
 	}
-	iterator lower_bound(const key_type& testElement); // first element >= testElement
+	iterator lower_bound(const key_type& testElement) {
+		// first element >= testElement
+	}
 	iterator upper_bound(const key_type& testElement); // first element > testElement
 
 	// return itr auf element falls dieses exsistiert.
