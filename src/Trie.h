@@ -128,6 +128,24 @@ public:
 				current(itr.current) {
 		}
 
+		TrieIterator(AbstractKnot* root, key_type& innerSeq) {
+			stackOfCurrentLeaf.push(root->getSonKnots().begin());
+			endOfSon.push(root->getSonKnots().end());
+			for (unsigned int i = 0; i < innerSeq.length(); ++i) {
+
+				if (stackOfCurrentLeaf.top()->second->getSonKnots().find(innerSeq[i])
+						== stackOfCurrentLeaf.top()->second->getSonKnots().end()) {
+					cout << "Die Sequenz konnte nicht gefunden werden." << endl;
+					 delete this;
+				} else {
+					stackOfCurrentLeaf.push(stackOfCurrentLeaf.top()->second->getSonKnots().find(innerSeq[i]));
+					endOfSon.push(stackOfCurrentLeaf.top()->second->getSonKnots().end());
+				}
+			}
+			current = nullptr;
+
+		}
+
 		void print() {
 			current->print(stackOfCurrentLeaf.size());
 		}
@@ -226,7 +244,7 @@ public:
 		if (key.length() == 0) {
 			current->getSonKnots().insert(
 					make_pair(leafToken, new LeafKnot(value.second)));
-			iterator it =  iterator(&root);
+			iterator it = iterator(&root);
 
 			cout << "iterator in insert: " << *it << endl;
 			cout << "value in insert: " << value.second << endl;
@@ -291,10 +309,43 @@ public:
 	void clear() {
 		// erase all
 	}
+
 	iterator lower_bound(const key_type& testElement) {
-		// first element >= testElement
+		char bound = ' ';
+		key_type lowerBound;
+		// find multiplie chars in string
+		for (int i = 0; i < testElement.length(); ++i) {
+			if (testElement[i] == testElement[i + 1]) {
+				bound = testElement[i];
+			}
+		}
+		int j = 0;
+		while (testElement[j] != testElement[j + 1]) {
+			lowerBound += testElement[j];
+			++j;
+		}
+		lowerBound += bound;
+		cout << "LowerBOund: " << lowerBound << endl;
+		return iterator(&root, lowerBound);
 	}
-	iterator upper_bound(const key_type& testElement); // first element > testElement
+	iterator upper_bound(const key_type& testElement) {
+		// first element >= testElement
+		char bound;
+		key_type upperBound;
+		// find multiplie chars in string
+		for (int i = 0; i < testElement.length(); ++i) {
+			if (testElement[i] == testElement[i + 1]) {
+				bound = testElement[i];
+			}
+		}
+
+		for (int j = 0; j <= testElement.length(); ++j) {
+
+
+		}
+		cout << "Upperbound: " << upperBound << endl;
+		return iterator();	// first element > testElement
+	}
 
 	// return itr auf element falls dieses exsistiert.
 	// return itr auf nullptr, wenn element nicht gefunden wurde.

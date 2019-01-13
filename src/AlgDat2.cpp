@@ -59,6 +59,8 @@ int main() {
 
 		if (input == "fill") {
 			for(wordpair x: preList){
+				//tree.lower_bound("abdcaaaaaaac");
+				tree.upper_bound("abdcaaaaaaac");
 				tree.insert(x,&tree.getRoot());
 			}
 		} else if (input == "show") {
