@@ -330,21 +330,23 @@ public:
 	}
 	iterator upper_bound(const key_type& testElement) {
 		// first element >= testElement
-		char bound;
+		char bound = '@';
 		key_type upperBound;
+		int count;
+
 		// find multiplie chars in string
 		for (int i = 0; i < testElement.length(); ++i) {
 			if (testElement[i] == testElement[i + 1]) {
 				bound = testElement[i];
 			}
+			else if (testElement[i] != bound && bound != '@'  ) {
+				count = i ;
+			}
+
 		}
-
-		for (int j = 0; j <= testElement.length(); ++j) {
-
-
-		}
+		upperBound = testElement.substr(0,count);
 		cout << "Upperbound: " << upperBound << endl;
-		return iterator();	// first element > testElement
+		return iterator(&root, upperBound);	// first element > testElement
 	}
 
 	// return itr auf element falls dieses exsistiert.
