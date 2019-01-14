@@ -17,7 +17,7 @@ typedef pair<string, string> wordpair;
 
 wordpair preList[] = {
 		wordpair("distel", "cool"), wordpair("distanz",
-		"distance"), wordpair("du", "you"), wordpair("durch", "through"), };
+		"distance"), wordpair("duda", "you"), wordpair("durch", "through"), };
 
 void preFill() {
 
@@ -60,7 +60,7 @@ int main() {
 		if (input == "fill") {
 			for(wordpair x: preList){
 				//tree.lower_bound("abdcaaaaaaac");
-				tree.upper_bound("abdcaaaaaaac");
+				//tree.upper_bound("abdcaaaaaaac");
 				tree.insert(x,&tree.getRoot());
 			}
 		} else if (input == "show") {

@@ -115,10 +115,6 @@ public:
 			if (root->getSonKnots().find('@') == root->getSonKnots().end()) {
 				slideLeft();
 			}
-			// set to first leaf
-			current =
-					(LeafKnot*) (*stackOfCurrentLeaf.top()).second->getSonKnots().find(
-							'@')->second;
 			cout << "ITERATOR FINISHED AT: " << stackOfCurrentLeaf.top()->first
 					<< " : " << current->getvalueLeaf() << endl;
 
@@ -133,13 +129,17 @@ public:
 			endOfSon.push(root->getSonKnots().end());
 			for (unsigned int i = 0; i < innerSeq.length(); ++i) {
 
-				if (stackOfCurrentLeaf.top()->second->getSonKnots().find(innerSeq[i])
+				if (stackOfCurrentLeaf.top()->second->getSonKnots().find(
+						innerSeq[i])
 						== stackOfCurrentLeaf.top()->second->getSonKnots().end()) {
 					cout << "Die Sequenz konnte nicht gefunden werden." << endl;
-					 delete this;
+					delete this;
 				} else {
-					stackOfCurrentLeaf.push(stackOfCurrentLeaf.top()->second->getSonKnots().find(innerSeq[i]));
-					endOfSon.push(stackOfCurrentLeaf.top()->second->getSonKnots().end());
+					stackOfCurrentLeaf.push(
+							stackOfCurrentLeaf.top()->second->getSonKnots().find(
+									innerSeq[i]));
+					endOfSon.push(
+							stackOfCurrentLeaf.top()->second->getSonKnots().end());
 				}
 			}
 			current = nullptr;
@@ -160,7 +160,6 @@ public:
 			return current == itr.current;
 		}
 		bool operator !=(const iterator& itr) {
-
 			return current != itr.current;
 		}
 
@@ -183,17 +182,21 @@ public:
 
 			}
 
-			//push left element and end of map ontop of the stacks.
+			current =
+					(LeafKnot*) (*stackOfCurrentLeaf.top()).second->getSonKnots().find(
+							'@')->second;
 
 		}
 
 		//prefix increment
 		iterator& operator ++() {
 			//go up and right
-			cout << "BEFORE ++TOP:" << stackOfCurrentLeaf.top()->second << endl;
+			cout << "BEFORE ++ Top of the Stack:"
+					<< stackOfCurrentLeaf.top()->second << endl;
 			++(stackOfCurrentLeaf.top());
-			cout << "AFTER ++TOP:" << stackOfCurrentLeaf.top()->second << endl;
-			cout << "END OF SONS TOP:" << endOfSon.top()->second << endl;
+			cout << "AFTER ++ Top of the Stack:"
+					<< stackOfCurrentLeaf.top()->second << endl;
+			cout << "End of Sons: " << (*endOfSon.top()).second << endl;
 			// pop until you find another sonKnot in your current top stack map.
 			while (stackOfCurrentLeaf.top() == endOfSon.top()) {
 				stackOfCurrentLeaf.pop();
@@ -203,18 +206,8 @@ public:
 
 			// down to the next leaf
 			slideLeft();
-			current =
-					(LeafKnot*) (*stackOfCurrentLeaf.top()).second->getSonKnots().find(
-							'@')->second;
 
-			// Outputs
-			cout << "Top of the Stacks after ++:  "
-					<< (*stackOfCurrentLeaf.top()).second << " , "
-					<< (*endOfSon.top()).second << endl;
-			cout << "Size OF STACKS: " << stackOfCurrentLeaf.size() << " END: "
-					<< endOfSon.size() << endl;
 			return *this;
-
 		}
 
 		// postfix increment
@@ -283,7 +276,7 @@ public:
 			if (trackStack.empty()) {
 				trackStack.push(pair<AbstractKnot*, char>(&root, ' '));
 			}
-			// push next key Knot ontop of the stack
+			// push next key Knot on top of the stack
 			current = trackStack.top().first;
 			trackStack.push(
 					pair<AbstractKnot*, char>(
@@ -298,8 +291,10 @@ public:
 		char currentKeyPath = trackStack.top().second;
 		if (current->getSonKnots().size() == 1) {
 			delete current;
-		} else {
+		} else if (current->getSonKnots().find(currentKeyPath) != current->getSonKnots().end()){
 			delete current->getSonKnots().find(currentKeyPath)->second;
+		} else {
+			return false;
 		}
 		trackStack.pop();
 
@@ -325,7 +320,7 @@ public:
 			++j;
 		}
 		lowerBound += bound;
-		cout << "LowerBOund: " << lowerBound << endl;
+		cout << "LowerBound: " << lowerBound << endl;
 		return iterator(&root, lowerBound);
 	}
 	iterator upper_bound(const key_type& testElement) {
@@ -338,13 +333,12 @@ public:
 		for (int i = 0; i < testElement.length(); ++i) {
 			if (testElement[i] == testElement[i + 1]) {
 				bound = testElement[i];
-			}
-			else if (testElement[i] != bound && bound != '@'  ) {
-				count = i ;
+			} else if (testElement[i] != bound && bound != '@') {
+				count = i;
 			}
 
 		}
-		upperBound = testElement.substr(0,count);
+		upperBound = testElement.substr(0, count);
 		cout << "Upperbound: " << upperBound << endl;
 		return iterator(&root, upperBound);	// first element > testElement
 	}
@@ -438,6 +432,7 @@ public:
 		//	cout << i << endl;
 		//} while (i <= 5 && it != end());
 //		return result;
+		return "Das ist nur ein Test String!";
 	}
 	InnerKnot& getRoot() {
 		return this->root;
