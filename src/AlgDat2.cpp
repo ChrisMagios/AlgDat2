@@ -15,15 +15,12 @@
 using namespace std;
 typedef pair<string, string> wordpair;
 
-wordpair preList[] = {
-		wordpair("distel", "cool"), wordpair("distanz",
-		"distance"), wordpair("duda", "you"), wordpair("durch", "through"), };
+wordpair preList[] = { wordpair("durch", "through"), wordpair("distel",
+		"distel"), wordpair("duda", "you"), wordpair("distanz", "distance"), };
 
 void preFill() {
 
 	for (wordpair x : preList) {
-
-
 
 	}
 }
@@ -58,11 +55,8 @@ int main() {
 		std::transform(input.begin(), input.end(), input.begin(), ::tolower);
 
 		if (input == "fill") {
-			for(wordpair x: preList){
-				// lower diese Element upper nächstes !
-				//tree.lower_bound("abdcaaaaaaac");
-				//tree.upper_bound("abdcaaaaaaac");
-				tree.insert(x,&tree.getRoot());
+			for (wordpair x : preList) {
+				tree.insert(wordpair(x.first, x.second), &tree.getRoot());
 			}
 		} else if (input == "show") {
 			cout << tree.toString() << endl;

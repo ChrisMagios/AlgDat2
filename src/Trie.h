@@ -167,6 +167,7 @@ public:
 		}
 
 		string itToString() {
+			cout << "ITERATOR TOSTRING" << endl;
 			stack<typename map<E, Trie<T, E>::AbstractKnot*>::iterator> tmpStack =
 					stackOfCurrentLeaf;
 			string res;
@@ -209,6 +210,7 @@ public:
 		}
 		void slideLeft() {
 			// check if the next left element is a leaf.
+			cout << "SLIDE LEF----------------------------" << endl;
 			char leafToken = '\0';
 			cout << "FIRST: " << (*stackOfCurrentLeaf.top()).first
 					<< " SECOND: " << (*stackOfCurrentLeaf.top()).second
@@ -241,13 +243,13 @@ public:
 		//prefix increment
 		iterator& operator ++() {
 			//go up and right
-			cout << "BEFORE ++ Top of the Stack:"
+			cout << "BEFORE ++ Top of the Stack: " << stackOfCurrentLeaf.top()->first << "    "
 					<< stackOfCurrentLeaf.top()->second << endl;
 			++(stackOfCurrentLeaf.top());
 
 			//next(stackOfCurrentLeaf.top());
 			if (stackOfCurrentLeaf.top()->first != '') {
-				cout << "AFTER ++ Top of the Stack:"
+				cout << "AFTER ++ Top of the Stack:" << stackOfCurrentLeaf.top()->first
 						<< stackOfCurrentLeaf.top()->second << endl;
 
 			} else {
@@ -255,12 +257,19 @@ public:
 			}
 
 			// pop until you find another sonKnot in your current top stack map.
-			while (stackOfCurrentLeaf.top()->first == '' || stackOfCurrentLeaf.top() == endOfSon.top()) {
+			while (stackOfCurrentLeaf.top()->first == '') {
 				cout <<"Pop Stacks!!" << endl;
 				popStacks();
+
+				cout << "BEFORE ++ Top of the Stack: " << stackOfCurrentLeaf.top()->first << "    "
+									<< stackOfCurrentLeaf.top()->second << endl;
 				++(stackOfCurrentLeaf.top());
 			}
 
+			if (stackOfCurrentLeaf.top()->first == '') {
+			cout << "AFTER WHILE ++ Top of the Stack: " << stackOfCurrentLeaf.top()->first
+									<< "   "<< stackOfCurrentLeaf.top()->second << endl;
+			}
 			// down to the next leaf
 			slideLeft();
 
