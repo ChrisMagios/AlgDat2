@@ -59,12 +59,13 @@ int main() {
 
 		if (input == "fill") {
 			for(wordpair x: preList){
+				// lower diese Element upper nächstes !
 				//tree.lower_bound("abdcaaaaaaac");
 				//tree.upper_bound("abdcaaaaaaac");
 				tree.insert(x,&tree.getRoot());
 			}
 		} else if (input == "show") {
-			//tree.toString();
+			cout << tree.toString() << endl;
 		} else if (input == "end") {
 			isDone = true;
 			cout << tree.toString() << endl;
