@@ -18,13 +18,6 @@ typedef pair<string, string> wordpair;
 wordpair preList[] = { wordpair("durch", "through"), wordpair("distel",
 		"distel"), wordpair("duda", "you"), wordpair("distanz", "distance"), };
 
-void preFill() {
-
-	for (wordpair x : preList) {
-
-	}
-}
-
 int main() {
 
 	//Stuff I need in the Main
@@ -34,13 +27,6 @@ int main() {
 	string input;
 
 	//------------------------
-
-	cout << "Welcome to the World trie?" << endl;
-	cout << "	  /\\_/\\  (" << endl;
-	cout << "	 ( ^.^ ) _)" << endl;
-	cout << "	   \\\"/  (" << endl;
-	cout << "	 ( | | )" << endl;
-	cout << "	(_d b_)" << endl;
 
 	cout << "To fill in a set of word type: fill" << endl;
 	cout << "Type end to end the program" << endl;
@@ -58,9 +44,38 @@ int main() {
 			for (wordpair x : preList) {
 				tree.insert(wordpair(x.first, x.second), &tree.getRoot());
 			}
-		} else if (input == "show") {
+			input.clear();
+			cin.clear();
+		}
+		if (input == "show") {
 			cout << tree.toString() << endl;
-		} else if (input == "end") {
+			input.clear();
+			cin.clear();
+		}
+//		if (input == "clear") {
+//			tree.clear();
+//			if (tree.getRoot().getSonKnots().empty()) {
+//				cout << "I erased all!!" << endl;
+//			} else {
+//				cout << "something went wrong.. erase no no" << endl;
+//			}
+//		}
+		if (input == "testfind") {
+
+			tree.insert(wordpair("erstens", "erstens"), &tree.getRoot());
+			tree.insert(wordpair("ersti", "ersti"), &tree.getRoot());
+			tree.insert(wordpair("ehsan", "ehsan"), &tree.getRoot());
+			tree.insert(wordpair("einsam", "einsam"), &tree.getRoot());
+
+			cout << "Test find einsam" << endl;
+			tree.find("einsam");
+
+			cout << "Test find troll" << endl;
+			tree.find("troll");
+			input.clear();
+			cin.clear();
+		}
+		else if (input == "end") {
 			isDone = true;
 			cout << tree.toString() << endl;
 		} else {
@@ -68,20 +83,28 @@ int main() {
 			string trans = "";
 			stringstream stream;
 			stream.str(input);
+			cout
+					<< "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+					<< input << endl;
 			stream >> word >> trans;
 
-			if (word == "" || trans == "") {
-				cout << "upps, somthing went wrong" << endl;
-				//savety first
-				stream.clear();
+			if (word == "find") {
+				tree.find(trans);
+				input.clear();
 				word.clear();
 				trans.clear();
+				stream.clear();
 				cin.clear();
-				//------------
+			} else if (word == "erase") {
 
+				cout << "Erased? " << tree.erase(trans) << endl;
+				cout << true << endl;
+				tree.find(trans);
+			} else if (word != "" && trans != "") {
+				tree.insert(wordpair(word, trans), &tree.getRoot());
+			} else {
+				cout << "upps, somthing went wrong" << endl;
 			}
-
-			tree.insert(wordpair(word, trans), &tree.getRoot());
 
 			stream.clear();
 			word.clear();
@@ -89,6 +112,8 @@ int main() {
 			cin.clear();
 
 		}
+
+		cin.clear();
 
 	}
 	return 0;

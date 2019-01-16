@@ -128,6 +128,9 @@ public:
 		TrieIterator() :
 				current(nullptr) {
 		}
+		LeafKnot* getCurrent(){
+			return current;
+		}
 
 		TrieIterator(AbstractKnot* root) {
 			// push root son Knots ontop of empty stack
@@ -214,22 +217,22 @@ public:
 		}
 		void slideLeft() {
 			// check if the next left element is a leaf.
-			cout << "SLIDE LEF----------------------------" << endl;
+//			cout << "SLIDE LEF----------------------------" << endl;
 			char leafToken = '\0';
-			cout << "FIRST: " << (*stackOfCurrentLeaf.top()).first
-					<< " SECOND: " << (*stackOfCurrentLeaf.top()).second
-					<< endl;
+//			cout << "FIRST: " << (*stackOfCurrentLeaf.top()).first
+//					<< " SECOND: " << (*stackOfCurrentLeaf.top()).second
+//					<< endl;
 
 			if (!stackOfCurrentLeaf.empty()) {
 				while (((*stackOfCurrentLeaf.top()).second->getSonKnots().find(
 						leafToken)
 						== (*stackOfCurrentLeaf.top()).second->getSonKnots().end())) {
 					// push It of begin and end of the same map to the stacks.
-					cout << "FIRST: "
-							<< (*stackOfCurrentLeaf.top()).second->getSonKnots().begin()->first
-							<< " SECOND: "
-							<< (*stackOfCurrentLeaf.top()).second->getSonKnots().begin()->second
-							<< endl;
+//					cout << "FIRST: "
+//							<< (*stackOfCurrentLeaf.top()).second->getSonKnots().begin()->first
+//							<< " SECOND: "
+//							<< (*stackOfCurrentLeaf.top()).second->getSonKnots().begin()->second
+//							<< endl;
 
 					stackOfCurrentLeaf.push(
 							(*stackOfCurrentLeaf.top()).second->getSonKnots().begin());
@@ -249,16 +252,16 @@ public:
 		//prefix increment
 		iterator& operator ++() {
 			//go up and right
-			cout << "BEFORE ++ Top of the Stack: "
-					<< stackOfCurrentLeaf.top()->first << "    "
-					<< stackOfCurrentLeaf.top()->second << endl;
+//			cout << "BEFORE ++ Top of the Stack: "
+//					<< stackOfCurrentLeaf.top()->first << "    "
+//					<< stackOfCurrentLeaf.top()->second << endl;
 			++(stackOfCurrentLeaf.top());
 
 			//next(stackOfCurrentLeaf.top());
 			if (stackOfCurrentLeaf.top()->first != '') {
-				cout << "AFTER ++ Top of the Stack:"
-						<< stackOfCurrentLeaf.top()->first
-						<< stackOfCurrentLeaf.top()->second << endl;
+//				cout << "AFTER ++ Top of the Stack:"
+//						<< stackOfCurrentLeaf.top()->first
+//						<< stackOfCurrentLeaf.top()->second << endl;
 
 			} else {
 				cout << "End erreicht!" << endl;
@@ -267,16 +270,16 @@ public:
 			// pop until you find another sonKnot in your current top stack map.
 			while (stackOfCurrentLeaf.top()->first == ''
 					|| stackOfCurrentLeaf.top()->first < 64) {
-				cout << "Pop Stacks!!" << endl;
+//				cout << "Pop Stacks!!" << endl;
 				popStacks();
 				if (stackOfCurrentLeaf.empty()) {
 					current = nullptr;
 					return *this;
 				}
 
-					cout << "BEFORE ++ Top of the Stack: "
-							<< stackOfCurrentLeaf.top()->first << "    "
-							<< stackOfCurrentLeaf.top()->second << endl;
+//					cout << "BEFORE ++ Top of the Stack: "
+//							<< stackOfCurrentLeaf.top()->first << "    "
+//							<< stackOfCurrentLeaf.top()->second << endl;
 					++(stackOfCurrentLeaf.top());
 
 
@@ -346,46 +349,35 @@ public:
 	// \0return false wenn letzter Knoten nicht gelöscht werden kann.
 	bool erase(const key_type& value) {
 		key_type key = value;
-		AbstractKnot* current;
-		// build up the trackStack
-		if (key.length() != 0) {
 
-			if (trackStack.empty()) {
-				trackStack.push(pair<AbstractKnot*, char>(&root, ' '));
-			}
-			// push next key Knot on top of the stack
-			current = trackStack.top().first;
-			trackStack.push(
-					pair<AbstractKnot*, char>(
-							current->getSonKnots().find(key[0])->second,
-							key[0]));
-			key = key.substr(1, key.length());
-			erase(key);
-		}
+		iterator itToErase = find(value);
+
 
 		// erase the leaf and the path of Inner Knots
-		current = trackStack.top().first;
-		char currentKeyPath = trackStack.top().second;
-		if (current->getSonKnots().size() == 1) {
-			delete current;
-		} else if (current->getSonKnots().find(currentKeyPath)
-				!= current->getSonKnots().end()) {
-			delete current->getSonKnots().find(currentKeyPath)->second;
-		} else {
-			return false;
+		delete itToErase.getStackOfCurrentLeaf().top()->second->getSonKnots().find(leafToken)->second;
+
+		while ( !itToErase.getStackOfCurrentLeaf().empty() && key.length() != 0) {
+
+			if (itToErase.getStackOfCurrentLeaf().top()->second->getSonKnots().size() <= 1) {
+				delete itToErase.getStackOfCurrentLeaf().top()->second;
+			} else {
+				delete itToErase.getStackOfCurrentLeaf().top()->second->getSonKnots().find(key[key.length()])->second;
+			}
+
+			key = key.substr(0, key.length() - 1);
+			itToErase.getStackOfCurrentLeaf().pop();
 		}
-		trackStack.pop();
 
 		return true;
 	}
 
 	void clear() {
 		iterator it(&root);
-		delete it.getStackOfCurrentLeaf().top()->getSonKnots().begin();
+		delete it.getStackOfCurrentLeaf().top()->second.getSonKnots().begin();
 
-		while (it.getStackOfCurrentLeaf().top()->getSonKnots.size() >= 1) {
+		while (it.getStackOfCurrentLeaf().top()->second.getSonKnots().size() >= 1) {
 			it.popStacks();
-			delete it.getStackOfCurrentLeaf().top()->getSonKnots().begin();
+			delete it.getStackOfCurrentLeaf().top()->second.getSonKnots().begin();
 		}
 		if (root.getSonKnots().size() >= 1) {
 			clear();
@@ -412,9 +404,10 @@ public:
 			}
 		}
 		iterator it = iterator(&root);
-		while (it != current->getSonKnots().find(leafToken)->second) {
+		while (it.getStackOfCurrentLeaf().top()->second->getSonKnots().find(leafToken)->second != current->getSonKnots().find(leafToken)->second) {
 			++it;
 		}
+		cout << "I'm from find(const key_type& element) and found the word: " << it.getCurrent()->getvalueLeaf() << endl;
 		return it;
 
 	}
