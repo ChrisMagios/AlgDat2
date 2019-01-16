@@ -173,7 +173,9 @@ public:
 			string res;
 			list<string> resList;
 			while (!tmpStack.empty()) {
-				resList.push_back(tmpStack.top()->second->toString(tmpStack.size())+ tmpStack.top()->first + "\n");
+				resList.push_back(
+						tmpStack.top()->second->toString(tmpStack.size())
+								+ tmpStack.top()->first + "\n");
 				tmpStack.pop();
 			}
 			resList.reverse();
@@ -194,10 +196,12 @@ public:
 			return *this;
 		}
 		bool operator ==(const iterator& itr) {
-			return current == itr.current;
+			return current == itr.current
+					&& stackOfCurrentLeaf == itr.stackOfCurrentLeaf;
 		}
 		bool operator !=(const iterator& itr) {
-			return current != itr.current;
+			return current != itr.current
+					&& stackOfCurrentLeaf != itr.stackOfCurrentLeaf;
 		}
 
 		mapped_type& operator *() {
@@ -215,41 +219,45 @@ public:
 			cout << "FIRST: " << (*stackOfCurrentLeaf.top()).first
 					<< " SECOND: " << (*stackOfCurrentLeaf.top()).second
 					<< endl;
-			while (((*stackOfCurrentLeaf.top()).second->getSonKnots().find(
-					leafToken)
-					== (*stackOfCurrentLeaf.top()).second->getSonKnots().end())) {
-				// push It of begin and end of the same map to the stacks.
-				cout << "FIRST: "
-						<< (*stackOfCurrentLeaf.top()).second->getSonKnots().begin()->first
-						<< " SECOND: "
-						<< (*stackOfCurrentLeaf.top()).second->getSonKnots().begin()->second
-						<< endl;
 
+			if (!stackOfCurrentLeaf.empty()) {
+				while (((*stackOfCurrentLeaf.top()).second->getSonKnots().find(
+						leafToken)
+						== (*stackOfCurrentLeaf.top()).second->getSonKnots().end())) {
+					// push It of begin and end of the same map to the stacks.
+					cout << "FIRST: "
+							<< (*stackOfCurrentLeaf.top()).second->getSonKnots().begin()->first
+							<< " SECOND: "
+							<< (*stackOfCurrentLeaf.top()).second->getSonKnots().begin()->second
+							<< endl;
 
-				stackOfCurrentLeaf.push(
-						(*stackOfCurrentLeaf.top()).second->getSonKnots().begin());
+					stackOfCurrentLeaf.push(
+							(*stackOfCurrentLeaf.top()).second->getSonKnots().begin());
 
-				endOfSon.push(
-						(*stackOfCurrentLeaf.top()).second->getSonKnots().end());
+					endOfSon.push(
+							(*stackOfCurrentLeaf.top()).second->getSonKnots().end());
 
+				}
+
+				current =
+						(LeafKnot*) (*stackOfCurrentLeaf.top()).second->getSonKnots().find(
+								'\0')->second;
+				cout << "LEAF: " << current->getvalueLeaf() << endl;
 			}
-
-			current =
-					(LeafKnot*) (*stackOfCurrentLeaf.top()).second->getSonKnots().find(
-							'\0')->second;
-			cout << "LEAF: " << current->getvalueLeaf() << endl;
 		}
 
 		//prefix increment
 		iterator& operator ++() {
 			//go up and right
-			cout << "BEFORE ++ Top of the Stack: " << stackOfCurrentLeaf.top()->first << "    "
+			cout << "BEFORE ++ Top of the Stack: "
+					<< stackOfCurrentLeaf.top()->first << "    "
 					<< stackOfCurrentLeaf.top()->second << endl;
 			++(stackOfCurrentLeaf.top());
 
 			//next(stackOfCurrentLeaf.top());
 			if (stackOfCurrentLeaf.top()->first != '') {
-				cout << "AFTER ++ Top of the Stack:" << stackOfCurrentLeaf.top()->first
+				cout << "AFTER ++ Top of the Stack:"
+						<< stackOfCurrentLeaf.top()->first
 						<< stackOfCurrentLeaf.top()->second << endl;
 
 			} else {
@@ -257,19 +265,23 @@ public:
 			}
 
 			// pop until you find another sonKnot in your current top stack map.
-			while (stackOfCurrentLeaf.top()->first == '') {
-				cout <<"Pop Stacks!!" << endl;
+			while (stackOfCurrentLeaf.top()->first == ''
+					|| stackOfCurrentLeaf.top()->first < 64) {
+				cout << "Pop Stacks!!" << endl;
 				popStacks();
+				if (stackOfCurrentLeaf.empty()) {
+					current = nullptr;
+					return *this;
+				}
 
-				cout << "BEFORE ++ Top of the Stack: " << stackOfCurrentLeaf.top()->first << "    "
-									<< stackOfCurrentLeaf.top()->second << endl;
-				++(stackOfCurrentLeaf.top());
+					cout << "BEFORE ++ Top of the Stack: "
+							<< stackOfCurrentLeaf.top()->first << "    "
+							<< stackOfCurrentLeaf.top()->second << endl;
+					++(stackOfCurrentLeaf.top());
+
+
 			}
 
-			if (stackOfCurrentLeaf.top()->first == '') {
-			cout << "AFTER WHILE ++ Top of the Stack: " << stackOfCurrentLeaf.top()->first
-									<< "   "<< stackOfCurrentLeaf.top()->second << endl;
-			}
 			// down to the next leaf
 			slideLeft();
 
@@ -381,44 +393,6 @@ public:
 
 	}
 
-	iterator lower_bound(const key_type& testElement) {
-		char bound = ' ';
-		key_type lowerBound;
-		// find multiplie chars in string
-		for (int i = 0; i < testElement.length(); ++i) {
-			if (testElement[i] == testElement[i + 1]) {
-				bound = testElement[i];
-			}
-		}
-		int j = 0;
-		while (testElement[j] != testElement[j + 1]) {
-			lowerBound += testElement[j];
-			++j;
-		}
-		lowerBound += bound;
-		cout << "LowerBound: " << lowerBound << endl;
-		return iterator(&root, lowerBound);
-	}
-	iterator upper_bound(const key_type& testElement) {
-		// first element >= testElement
-		char bound = '\0';
-		key_type upperBound;
-		int count;
-
-		// find multiplie chars in string
-		for (int i = 0; i < testElement.length(); ++i) {
-			if (testElement[i] == testElement[i + 1]) {
-				bound = testElement[i];
-			} else if (testElement[i] != bound && bound != '\0') {
-				count = i;
-			}
-
-		}
-		upperBound = testElement.substr(0, count);
-		cout << "Upperbound: " << upperBound << endl;
-		return iterator(&root, upperBound);	// first element > testElement
-	}
-
 	// return itr auf element falls dieses exsistiert.
 	// return itr auf nullptr, wenn element nicht gefunden wurde.
 	iterator find(const key_type& element) {
@@ -454,14 +428,20 @@ public:
 
 		iterator it = iterator(&root);
 
-	}
+		while (!it.getStackOfCurrentLeaf().empty()) {
+			++it;
 
+		}
+
+		return it;
+
+	}
 
 	// Change loop param to this.end() if done!!!
 	string toString() {
 		iterator it(&root);
 		string result;
-		for (int i = 0 ; i < 3 ; ++i) {
+		while (it != end()) {
 			result += it.itToString();
 			++it;
 		}
@@ -470,6 +450,45 @@ public:
 	InnerKnot& getRoot() {
 		return this->root;
 	}
+
+//	iterator lower_bound(const key_type& testElement) {
+//		char bound = ' ';
+//		key_type lowerBound;
+//		// find multiplie chars in string
+//		for (int i = 0; i < testElement.length(); ++i) {
+//			if (testElement[i] == testElement[i + 1]) {
+//				bound = testElement[i];
+//			}
+//		}
+//		int j = 0;
+//		while (testElement[j] != testElement[j + 1]) {
+//			lowerBound += testElement[j];
+//			++j;
+//		}
+//		lowerBound += bound;
+//		cout << "LowerBound: " << lowerBound << endl;
+//		return iterator(&root, lowerBound);
+//	}
+//	iterator upper_bound(const key_type& testElement) {
+//		// first element >= testElement
+//		char bound = '\0';
+//		key_type upperBound;
+//		int count;
+//
+//		// find multiplie chars in string
+//		for (int i = 0; i < testElement.length(); ++i) {
+//			if (testElement[i] == testElement[i + 1]) {
+//				bound = testElement[i];
+//			} else if (testElement[i] != bound && bound != '\0') {
+//				count = i;
+//			}
+//
+//		}
+//		upperBound = testElement.substr(0, count);
+//		cout << "Upperbound: " << upperBound << endl;
+//		return iterator(&root, upperBound);	// first element > testElement
+//	}
+//
 
 	virtual ~Trie() {
 
