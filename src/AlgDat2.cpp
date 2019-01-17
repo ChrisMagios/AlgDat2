@@ -39,82 +39,64 @@ int main() {
 
 		std::getline(cin, input);
 		std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+		string word = "";
+		string trans = "";
+		stringstream stream;
+		stream.str(input);
+		stream >> word >> trans;
+		cout << trans << endl;
 
-		if (input == "fill") {
-			for (wordpair x : preList) {
-				tree.insert(wordpair(x.first, x.second), &tree.getRoot());
+		if (trans == "") {
+
+			if (word == "fill") {
+
+				for (wordpair x : preList) {
+					tree.insert(wordpair(x.first, x.second), &tree.getRoot());
+				}
+
+			} else if (word == "show") {
+				cout << tree.toString() << endl;
+
+			} else if (word == "clear") {
+				tree.clear();
+				cout << "XX" << tree.getRoot().getSonKnots().size() << endl;
+			} else if (word == "testfind") {
+
+				tree.insert(wordpair("erstens", "erstens"), &tree.getRoot());
+				tree.insert(wordpair("ersti", "ersti"), &tree.getRoot());
+				tree.insert(wordpair("ehsan", "ehsan"), &tree.getRoot());
+				tree.insert(wordpair("einsam", "einsam"), &tree.getRoot());
+				cout << "Test find einsam" << endl;
+				tree.find("einsam");
+				cout << "Test find troll" << endl;
+				tree.find("troll");
 			}
+
+			else if (word == "end") {
+				isDone = true;
+				cout << tree.toString() << endl;
+			} else if (word != "") {
+				cout << "sorry I don't understand" << endl;
+			}
+
 			input.clear();
 			cin.clear();
-		}
-		if (input == "show") {
-			cout << tree.toString() << endl;
-			input.clear();
-			cin.clear();
-		}
-//		if (input == "clear") {
-//			tree.clear();
-//			if (tree.getRoot().getSonKnots().empty()) {
-//				cout << "I erased all!!" << endl;
-//			} else {
-//				cout << "something went wrong.. erase no no" << endl;
-//			}
-//		}
-		if (input == "testfind") {
-
-			tree.insert(wordpair("erstens", "erstens"), &tree.getRoot());
-			tree.insert(wordpair("ersti", "ersti"), &tree.getRoot());
-			tree.insert(wordpair("ehsan", "ehsan"), &tree.getRoot());
-			tree.insert(wordpair("einsam", "einsam"), &tree.getRoot());
-
-			cout << "Test find einsam" << endl;
-			tree.find("einsam");
-
-			cout << "Test find troll" << endl;
-			tree.find("troll");
-			input.clear();
-			cin.clear();
-		}
-		else if (input == "end") {
-			isDone = true;
-			cout << tree.toString() << endl;
 		} else {
-			string word = "";
-			string trans = "";
-			stringstream stream;
-			stream.str(input);
-			cout
-					<< "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-					<< input << endl;
-			stream >> word >> trans;
 
 			if (word == "find") {
 				tree.find(trans);
-				input.clear();
-				word.clear();
-				trans.clear();
-				stream.clear();
-				cin.clear();
 			} else if (word == "erase") {
-
-				cout << "Erased? " << tree.erase(trans) << endl;
-				cout << true << endl;
-				tree.find(trans);
+				tree.erase(trans);
 			} else if (word != "" && trans != "") {
 				tree.insert(wordpair(word, trans), &tree.getRoot());
 			} else {
 				cout << "upps, somthing went wrong" << endl;
 			}
-
 			stream.clear();
 			word.clear();
 			trans.clear();
 			cin.clear();
-
 		}
-
-		cin.clear();
-
 	}
 	return 0;
 }
