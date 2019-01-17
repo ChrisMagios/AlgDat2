@@ -28,12 +28,24 @@ int main() {
 
 	//------------------------
 
-	cout << "To fill in a set of word type: fill" << endl;
-	cout << "Type end to end the program" << endl;
-	cout << "Type show, to see the trie" << endl;
+	cout << "      ." << endl;
+	cout << "   _/ \\_" << endl;
+	cout << "   \\     /" << endl;
+	cout << "   /.'o'.\\" << endl;
+	cout << "    .o.'." << endl;
+	cout << "   .'.'o'." << endl;
+	cout << "  o'.o.'.o." << endl;
+	cout << " .'.o.'.'.o." << endl;
+	cout << ".o.'.o.'.o.'." << endl;
+	cout << "   [___]" << endl;
+	cout << "    \\___/    " << endl;
+
+
+	cout << "______________" << endl;
 	cout << "To enter a word pair do as following:" << endl;
 	cout << "Example: welt world" << endl;
-	cout << "Use the command show to have a visual of the trie" << endl;
+	cout << "Use the command help to see all commands" << endl;
+	cout << "______________" << endl;
 
 	while (!isDone) {
 
@@ -44,28 +56,51 @@ int main() {
 		stringstream stream;
 		stream.str(input);
 		stream >> word >> trans;
-		cout << trans << endl;
 
 		if (trans == "") {
 
 			if (word == "fill") {
 
 				for (wordpair x : preList) {
-					tree.insert(wordpair(x.first, x.second), &tree.getRoot());
+					tree.insert(wordpair(x.first, x.second));
 				}
+				tree.print();
+			} else if (word == "help") {
+
+				cout << "[fill] -> for a prefilled list" << endl;
+				cout
+						<< "[word translation] -> to insert a word and a translation to the trie"
+						<< endl;
+				cout << "[show] -> for a visual of the trie" << endl;
+				cout << "[clear] -> to erase all elements of the trie" << endl;
+				cout << "[erase word] -> to erase a word and its translation"
+						<< endl;
+				cout << "[find word] -> to get the translation of the word"
+						<< endl;
+				cout << "[testfind] -> to test the find method" << endl;
+				cout << "[end] -> to end the Programm without exception"
+						<< endl;
+				cout << "______________" << endl;
 
 			} else if (word == "show") {
 				cout << tree.toString() << endl;
 
 			} else if (word == "clear") {
 				tree.clear();
-				cout << "XX" << tree.getRoot().getSonKnots().size() << endl;
+				if(tree.empty()){
+					cout << "All elements have been erased from the trie!" << endl;
+					cout << "The trie is empty now!!" << endl;
+				}
+				else {
+					cout << "If you see this, something went worng. The trie isn't empty... sry..." << endl;
+				}
+
 			} else if (word == "testfind") {
 
-				tree.insert(wordpair("erstens", "erstens"), &tree.getRoot());
-				tree.insert(wordpair("ersti", "ersti"), &tree.getRoot());
-				tree.insert(wordpair("ehsan", "ehsan"), &tree.getRoot());
-				tree.insert(wordpair("einsam", "einsam"), &tree.getRoot());
+				tree.insert(wordpair("erstens", "erstens"));
+				tree.insert(wordpair("ersti", "ersti"));
+				tree.insert(wordpair("ehsan", "ehsan"));
+				tree.insert(wordpair("einsam", "einsam"));
 				cout << "Test find einsam" << endl;
 				tree.find("einsam");
 				cout << "Test find troll" << endl;
@@ -84,11 +119,39 @@ int main() {
 		} else {
 
 			if (word == "find") {
-				tree.find(trans);
+				//tree.find(trans);
+				cout << "Searching for the word " << "\"" << trans << "\"" << "..." << endl;
+
+				if(tree.find(trans).getCurrent()->getvalueLeaf() == tree.begin().getCurrent()->getvalueLeaf()){
+					cout << "closer" << endl;
+				}
+
+
+
+//				if(tree.find(trans).getCurrent()->getvalueLeaf() != trans){
+//					cout << trans << endl;
+//					cout << tree.find(trans).getCurrent()->getvalueLeaf() << endl;
+//					cout << "I didn't find it. The Word \"" << trans << "\" does not exist within the trie!" << endl;
+//				}
+				cout << "This is what I found: " << tree.find(trans).getCurrent()->getvalueLeaf() << endl;
+//				else{
+//					cout << "This is what I found: " << tree.find(trans).getCurrent()->getvalueLeaf() << endl;
+//				}
 			} else if (word == "erase") {
-				tree.erase(trans);
+				if(tree.erase(trans)){
+					cout << "The word: " << trans << " has been erased!" << endl;
+				}
+				else {
+					if(tree.find(trans).getCurrent()->getvalueLeaf() == trans){
+						cout << "if you see this we messed up" << endl;
+					}
+					else{
+						cout << "The word " << "\""<< trans << "\"" <<  " does not exist!!" << endl;
+					}
+				}
+
 			} else if (word != "" && trans != "") {
-				tree.insert(wordpair(word, trans), &tree.getRoot());
+				tree.insert(wordpair(word, trans));
 			} else {
 				cout << "upps, somthing went wrong" << endl;
 			}
